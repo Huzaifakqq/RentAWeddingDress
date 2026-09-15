@@ -1,0 +1,837 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+  <!-- EF Runtime content -->
+  <edmx:Runtime>
+    <!-- SSDL content -->
+    <edmx:StorageModels>
+      <Schema Namespace="RentAWeddingDressModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2008" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+        <EntityType Name="BookingDetail">
+          <Key>
+            <PropertyRef Name="BD_id" />
+          </Key>
+          <Property Name="BD_id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="BR_id" Type="int" Nullable="false" />
+          <Property Name="D_id" Type="int" Nullable="false" />
+          <Property Name="TotalPrice" Type="decimal" Precision="18" Scale="2" Nullable="false" />
+          <Property Name="Feedback" Type="nvarchar(max)" />
+          <Property Name="Rating" Type="int" />
+        </EntityType>
+        <EntityType Name="BookingRequest">
+          <Key>
+            <PropertyRef Name="BR_id" />
+          </Key>
+          <Property Name="BR_id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="U_id" Type="int" Nullable="false" />
+          <Property Name="UserAddressID" Type="int" Nullable="false" />
+          <Property Name="StartingDate" Type="datetime" Nullable="false" />
+          <Property Name="NoOfDays" Type="int" Nullable="false" />
+          <Property Name="ReturnDate" Type="datetime" Nullable="false" />
+          <Property Name="Status" Type="int" />
+        </EntityType>
+        <EntityType Name="Dress">
+          <Key>
+            <PropertyRef Name="D_id" />
+          </Key>
+          <Property Name="D_id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="U_id" Type="int" Nullable="false" />
+          <Property Name="Category_id" Type="int" Nullable="false" />
+          <Property Name="SubCategory_id" Type="int" Nullable="false" />
+          <Property Name="Condition" Type="int" Nullable="false" />
+          <Property Name="Dtitle" Type="nvarchar" MaxLength="150" Nullable="false" />
+          <Property Name="Description" Type="nvarchar(max)" />
+          <Property Name="Gender" Type="nvarchar" MaxLength="10" Nullable="false" />
+          <Property Name="RentPrice" Type="decimal" Precision="18" Scale="2" Nullable="false" />
+        </EntityType>
+        <EntityType Name="DressCategory">
+          <Key>
+            <PropertyRef Name="Category_id" />
+          </Key>
+          <Property Name="Category_id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Cname" Type="nvarchar" MaxLength="50" Nullable="false" />
+        </EntityType>
+        <EntityType Name="DressImages">
+          <Key>
+            <PropertyRef Name="DI_id" />
+          </Key>
+          <Property Name="DI_id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="D_id" Type="int" Nullable="false" />
+          <Property Name="ImgPath" Type="nvarchar(max)" Nullable="false" />
+        </EntityType>
+        <EntityType Name="DressOccasion">
+          <Key>
+            <PropertyRef Name="Occasion_id" />
+          </Key>
+          <Property Name="Occasion_id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="D_id" Type="int" Nullable="false" />
+          <Property Name="Occasion" Type="nvarchar" MaxLength="50" Nullable="false" />
+        </EntityType>
+        <EntityType Name="DressSizes">
+          <Key>
+            <PropertyRef Name="DS_id" />
+          </Key>
+          <Property Name="DS_id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="D_id" Type="int" Nullable="false" />
+          <Property Name="Size_id" Type="int" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Sizes">
+          <Key>
+            <PropertyRef Name="Size_id" />
+          </Key>
+          <Property Name="Size_id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="SizeName" Type="nvarchar" MaxLength="10" Nullable="false" />
+        </EntityType>
+        <EntityType Name="SubCategory">
+          <Key>
+            <PropertyRef Name="SubCategory_id" />
+          </Key>
+          <Property Name="SubCategory_id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Category_id" Type="int" Nullable="false" />
+          <Property Name="SCname" Type="nvarchar" MaxLength="50" Nullable="false" />
+        </EntityType>
+        <EntityType Name="UserAddress">
+          <Key>
+            <PropertyRef Name="UA_id" />
+          </Key>
+          <Property Name="UA_id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="U_id" Type="int" Nullable="false" />
+          <Property Name="Address" Type="nvarchar(max)" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Users">
+          <Key>
+            <PropertyRef Name="U_id" />
+          </Key>
+          <Property Name="U_id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Name" Type="nvarchar" MaxLength="100" Nullable="false" />
+          <Property Name="Contact" Type="nvarchar" MaxLength="50" Nullable="false" />
+          <Property Name="Password" Type="nvarchar" MaxLength="255" Nullable="false" />
+        </EntityType>
+        <Association Name="FK__BookingDe__BR_id__02FC7413">
+          <End Role="BookingRequest" Type="Self.BookingRequest" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="BookingDetail" Type="Self.BookingDetail" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="BookingRequest">
+              <PropertyRef Name="BR_id" />
+            </Principal>
+            <Dependent Role="BookingDetail">
+              <PropertyRef Name="BR_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__BookingDet__D_id__03F0984C">
+          <End Role="Dress" Type="Self.Dress" Multiplicity="1" />
+          <End Role="BookingDetail" Type="Self.BookingDetail" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Dress">
+              <PropertyRef Name="D_id" />
+            </Principal>
+            <Dependent Role="BookingDetail">
+              <PropertyRef Name="D_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__BookingRe__UserA__7F2BE32F">
+          <End Role="UserAddress" Type="Self.UserAddress" Multiplicity="1" />
+          <End Role="BookingRequest" Type="Self.BookingRequest" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="UserAddress">
+              <PropertyRef Name="UA_id" />
+            </Principal>
+            <Dependent Role="BookingRequest">
+              <PropertyRef Name="UserAddressID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__BookingReq__U_id__7E37BEF6">
+          <End Role="Users" Type="Self.Users" Multiplicity="1" />
+          <End Role="BookingRequest" Type="Self.BookingRequest" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Users">
+              <PropertyRef Name="U_id" />
+            </Principal>
+            <Dependent Role="BookingRequest">
+              <PropertyRef Name="U_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__Dress__Category___6B24EA82">
+          <End Role="DressCategory" Type="Self.DressCategory" Multiplicity="1" />
+          <End Role="Dress" Type="Self.Dress" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="DressCategory">
+              <PropertyRef Name="Category_id" />
+            </Principal>
+            <Dependent Role="Dress">
+              <PropertyRef Name="Category_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__Dress__SubCatego__6C190EBB">
+          <End Role="SubCategory" Type="Self.SubCategory" Multiplicity="1" />
+          <End Role="Dress" Type="Self.Dress" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="SubCategory">
+              <PropertyRef Name="SubCategory_id" />
+            </Principal>
+            <Dependent Role="Dress">
+              <PropertyRef Name="SubCategory_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__Dress__U_id__6A30C649">
+          <End Role="Users" Type="Self.Users" Multiplicity="1" />
+          <End Role="Dress" Type="Self.Dress" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Users">
+              <PropertyRef Name="U_id" />
+            </Principal>
+            <Dependent Role="Dress">
+              <PropertyRef Name="U_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__DressImage__D_id__6EF57B66">
+          <End Role="Dress" Type="Self.Dress" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="DressImages" Type="Self.DressImages" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Dress">
+              <PropertyRef Name="D_id" />
+            </Principal>
+            <Dependent Role="DressImages">
+              <PropertyRef Name="D_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__DressOccas__D_id__71D1E811">
+          <End Role="Dress" Type="Self.Dress" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="DressOccasion" Type="Self.DressOccasion" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Dress">
+              <PropertyRef Name="D_id" />
+            </Principal>
+            <Dependent Role="DressOccasion">
+              <PropertyRef Name="D_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__DressSize__Size___787EE5A0">
+          <End Role="Sizes" Type="Self.Sizes" Multiplicity="1" />
+          <End Role="DressSizes" Type="Self.DressSizes" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Sizes">
+              <PropertyRef Name="Size_id" />
+            </Principal>
+            <Dependent Role="DressSizes">
+              <PropertyRef Name="Size_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__DressSizes__D_id__778AC167">
+          <End Role="Dress" Type="Self.Dress" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="DressSizes" Type="Self.DressSizes" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Dress">
+              <PropertyRef Name="D_id" />
+            </Principal>
+            <Dependent Role="DressSizes">
+              <PropertyRef Name="D_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__SubCatego__Categ__656C112C">
+          <End Role="DressCategory" Type="Self.DressCategory" Multiplicity="1" />
+          <End Role="SubCategory" Type="Self.SubCategory" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="DressCategory">
+              <PropertyRef Name="Category_id" />
+            </Principal>
+            <Dependent Role="SubCategory">
+              <PropertyRef Name="Category_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__UserAddres__U_id__5FB337D6">
+          <End Role="Users" Type="Self.Users" Multiplicity="1" />
+          <End Role="UserAddress" Type="Self.UserAddress" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Users">
+              <PropertyRef Name="U_id" />
+            </Principal>
+            <Dependent Role="UserAddress">
+              <PropertyRef Name="U_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityContainer Name="RentAWeddingDressModelStoreContainer">
+          <EntitySet Name="BookingDetail" EntityType="Self.BookingDetail" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="BookingRequest" EntityType="Self.BookingRequest" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Dress" EntityType="Self.Dress" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="DressCategory" EntityType="Self.DressCategory" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="DressImages" EntityType="Self.DressImages" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="DressOccasion" EntityType="Self.DressOccasion" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="DressSizes" EntityType="Self.DressSizes" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Sizes" EntityType="Self.Sizes" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="SubCategory" EntityType="Self.SubCategory" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="UserAddress" EntityType="Self.UserAddress" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Users" EntityType="Self.Users" Schema="dbo" store:Type="Tables" />
+          <AssociationSet Name="FK__BookingDe__BR_id__02FC7413" Association="Self.FK__BookingDe__BR_id__02FC7413">
+            <End Role="BookingRequest" EntitySet="BookingRequest" />
+            <End Role="BookingDetail" EntitySet="BookingDetail" />
+          </AssociationSet>
+          <AssociationSet Name="FK__BookingDet__D_id__03F0984C" Association="Self.FK__BookingDet__D_id__03F0984C">
+            <End Role="Dress" EntitySet="Dress" />
+            <End Role="BookingDetail" EntitySet="BookingDetail" />
+          </AssociationSet>
+          <AssociationSet Name="FK__BookingRe__UserA__7F2BE32F" Association="Self.FK__BookingRe__UserA__7F2BE32F">
+            <End Role="UserAddress" EntitySet="UserAddress" />
+            <End Role="BookingRequest" EntitySet="BookingRequest" />
+          </AssociationSet>
+          <AssociationSet Name="FK__BookingReq__U_id__7E37BEF6" Association="Self.FK__BookingReq__U_id__7E37BEF6">
+            <End Role="Users" EntitySet="Users" />
+            <End Role="BookingRequest" EntitySet="BookingRequest" />
+          </AssociationSet>
+          <AssociationSet Name="FK__Dress__Category___6B24EA82" Association="Self.FK__Dress__Category___6B24EA82">
+            <End Role="DressCategory" EntitySet="DressCategory" />
+            <End Role="Dress" EntitySet="Dress" />
+          </AssociationSet>
+          <AssociationSet Name="FK__Dress__SubCatego__6C190EBB" Association="Self.FK__Dress__SubCatego__6C190EBB">
+            <End Role="SubCategory" EntitySet="SubCategory" />
+            <End Role="Dress" EntitySet="Dress" />
+          </AssociationSet>
+          <AssociationSet Name="FK__Dress__U_id__6A30C649" Association="Self.FK__Dress__U_id__6A30C649">
+            <End Role="Users" EntitySet="Users" />
+            <End Role="Dress" EntitySet="Dress" />
+          </AssociationSet>
+          <AssociationSet Name="FK__DressImage__D_id__6EF57B66" Association="Self.FK__DressImage__D_id__6EF57B66">
+            <End Role="Dress" EntitySet="Dress" />
+            <End Role="DressImages" EntitySet="DressImages" />
+          </AssociationSet>
+          <AssociationSet Name="FK__DressOccas__D_id__71D1E811" Association="Self.FK__DressOccas__D_id__71D1E811">
+            <End Role="Dress" EntitySet="Dress" />
+            <End Role="DressOccasion" EntitySet="DressOccasion" />
+          </AssociationSet>
+          <AssociationSet Name="FK__DressSize__Size___787EE5A0" Association="Self.FK__DressSize__Size___787EE5A0">
+            <End Role="Sizes" EntitySet="Sizes" />
+            <End Role="DressSizes" EntitySet="DressSizes" />
+          </AssociationSet>
+          <AssociationSet Name="FK__DressSizes__D_id__778AC167" Association="Self.FK__DressSizes__D_id__778AC167">
+            <End Role="Dress" EntitySet="Dress" />
+            <End Role="DressSizes" EntitySet="DressSizes" />
+          </AssociationSet>
+          <AssociationSet Name="FK__SubCatego__Categ__656C112C" Association="Self.FK__SubCatego__Categ__656C112C">
+            <End Role="DressCategory" EntitySet="DressCategory" />
+            <End Role="SubCategory" EntitySet="SubCategory" />
+          </AssociationSet>
+          <AssociationSet Name="FK__UserAddres__U_id__5FB337D6" Association="Self.FK__UserAddres__U_id__5FB337D6">
+            <End Role="Users" EntitySet="Users" />
+            <End Role="UserAddress" EntitySet="UserAddress" />
+          </AssociationSet>
+        </EntityContainer>
+      </Schema>
+    </edmx:StorageModels>
+    <!-- CSDL content -->
+    <edmx:ConceptualModels>
+      <Schema Namespace="RentAWeddingDressModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+        <EntityType Name="BookingDetail">
+          <Key>
+            <PropertyRef Name="BD_id" />
+          </Key>
+          <Property Name="BD_id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="BR_id" Type="Int32" Nullable="false" />
+          <Property Name="D_id" Type="Int32" Nullable="false" />
+          <Property Name="TotalPrice" Type="Decimal" Precision="18" Scale="2" Nullable="false" />
+          <Property Name="Feedback" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="Rating" Type="Int32" />
+          <NavigationProperty Name="BookingRequest" Relationship="Self.FK__BookingDe__BR_id__02FC7413" FromRole="BookingDetail" ToRole="BookingRequest" />
+          <NavigationProperty Name="Dress" Relationship="Self.FK__BookingDet__D_id__03F0984C" FromRole="BookingDetail" ToRole="Dress" />
+        </EntityType>
+        <EntityType Name="BookingRequest">
+          <Key>
+            <PropertyRef Name="BR_id" />
+          </Key>
+          <Property Name="BR_id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="U_id" Type="Int32" Nullable="false" />
+          <Property Name="UserAddressID" Type="Int32" Nullable="false" />
+          <Property Name="StartingDate" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="NoOfDays" Type="Int32" Nullable="false" />
+          <Property Name="ReturnDate" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="Status" Type="Int32" />
+          <NavigationProperty Name="BookingDetails" Relationship="Self.FK__BookingDe__BR_id__02FC7413" FromRole="BookingRequest" ToRole="BookingDetail" />
+          <NavigationProperty Name="UserAddress" Relationship="Self.FK__BookingRe__UserA__7F2BE32F" FromRole="BookingRequest" ToRole="UserAddress" />
+          <NavigationProperty Name="User" Relationship="Self.FK__BookingReq__U_id__7E37BEF6" FromRole="BookingRequest" ToRole="Users" />
+        </EntityType>
+        <EntityType Name="Dress">
+          <Key>
+            <PropertyRef Name="D_id" />
+          </Key>
+          <Property Name="D_id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="U_id" Type="Int32" Nullable="false" />
+          <Property Name="Category_id" Type="Int32" Nullable="false" />
+          <Property Name="SubCategory_id" Type="Int32" Nullable="false" />
+          <Property Name="Condition" Type="Int32" Nullable="false" />
+          <Property Name="Dtitle" Type="String" MaxLength="150" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Description" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="Gender" Type="String" MaxLength="10" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="RentPrice" Type="Decimal" Precision="18" Scale="2" Nullable="false" />
+          <NavigationProperty Name="BookingDetails" Relationship="Self.FK__BookingDet__D_id__03F0984C" FromRole="Dress" ToRole="BookingDetail" />
+          <NavigationProperty Name="DressCategory" Relationship="Self.FK__Dress__Category___6B24EA82" FromRole="Dress" ToRole="DressCategory" />
+          <NavigationProperty Name="SubCategory" Relationship="Self.FK__Dress__SubCatego__6C190EBB" FromRole="Dress" ToRole="SubCategory" />
+          <NavigationProperty Name="User" Relationship="Self.FK__Dress__U_id__6A30C649" FromRole="Dress" ToRole="Users" />
+          <NavigationProperty Name="DressImages" Relationship="Self.FK__DressImage__D_id__6EF57B66" FromRole="Dress" ToRole="DressImages" />
+          <NavigationProperty Name="DressOccasions" Relationship="Self.FK__DressOccas__D_id__71D1E811" FromRole="Dress" ToRole="DressOccasion" />
+          <NavigationProperty Name="DressSizes" Relationship="Self.FK__DressSizes__D_id__778AC167" FromRole="Dress" ToRole="DressSizes" />
+        </EntityType>
+        <EntityType Name="DressCategory">
+          <Key>
+            <PropertyRef Name="Category_id" />
+          </Key>
+          <Property Name="Category_id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Cname" Type="String" MaxLength="50" FixedLength="false" Unicode="true" Nullable="false" />
+          <NavigationProperty Name="Dresses" Relationship="Self.FK__Dress__Category___6B24EA82" FromRole="DressCategory" ToRole="Dress" />
+          <NavigationProperty Name="SubCategories" Relationship="Self.FK__SubCatego__Categ__656C112C" FromRole="DressCategory" ToRole="SubCategory" />
+        </EntityType>
+        <EntityType Name="DressImage">
+          <Key>
+            <PropertyRef Name="DI_id" />
+          </Key>
+          <Property Name="DI_id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="D_id" Type="Int32" Nullable="false" />
+          <Property Name="ImgPath" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" Nullable="false" />
+          <NavigationProperty Name="Dress" Relationship="Self.FK__DressImage__D_id__6EF57B66" FromRole="DressImages" ToRole="Dress" />
+        </EntityType>
+        <EntityType Name="DressOccasion">
+          <Key>
+            <PropertyRef Name="Occasion_id" />
+          </Key>
+          <Property Name="Occasion_id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="D_id" Type="Int32" Nullable="false" />
+          <Property Name="Occasion" Type="String" MaxLength="50" FixedLength="false" Unicode="true" Nullable="false" />
+          <NavigationProperty Name="Dress" Relationship="Self.FK__DressOccas__D_id__71D1E811" FromRole="DressOccasion" ToRole="Dress" />
+        </EntityType>
+        <EntityType Name="DressSize">
+          <Key>
+            <PropertyRef Name="DS_id" />
+          </Key>
+          <Property Name="DS_id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="D_id" Type="Int32" Nullable="false" />
+          <Property Name="Size_id" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="Dress" Relationship="Self.FK__DressSizes__D_id__778AC167" FromRole="DressSizes" ToRole="Dress" />
+          <NavigationProperty Name="Size" Relationship="Self.FK__DressSize__Size___787EE5A0" FromRole="DressSizes" ToRole="Sizes" />
+        </EntityType>
+        <EntityType Name="Size">
+          <Key>
+            <PropertyRef Name="Size_id" />
+          </Key>
+          <Property Name="Size_id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="SizeName" Type="String" MaxLength="10" FixedLength="false" Unicode="true" Nullable="false" />
+          <NavigationProperty Name="DressSizes" Relationship="Self.FK__DressSize__Size___787EE5A0" FromRole="Sizes" ToRole="DressSizes" />
+        </EntityType>
+        <EntityType Name="SubCategory">
+          <Key>
+            <PropertyRef Name="SubCategory_id" />
+          </Key>
+          <Property Name="SubCategory_id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Category_id" Type="Int32" Nullable="false" />
+          <Property Name="SCname" Type="String" MaxLength="50" FixedLength="false" Unicode="true" Nullable="false" />
+          <NavigationProperty Name="Dresses" Relationship="Self.FK__Dress__SubCatego__6C190EBB" FromRole="SubCategory" ToRole="Dress" />
+          <NavigationProperty Name="DressCategory" Relationship="Self.FK__SubCatego__Categ__656C112C" FromRole="SubCategory" ToRole="DressCategory" />
+        </EntityType>
+        <EntityType Name="UserAddress">
+          <Key>
+            <PropertyRef Name="UA_id" />
+          </Key>
+          <Property Name="UA_id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="U_id" Type="Int32" Nullable="false" />
+          <Property Name="Address" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" Nullable="false" />
+          <NavigationProperty Name="BookingRequests" Relationship="Self.FK__BookingRe__UserA__7F2BE32F" FromRole="UserAddress" ToRole="BookingRequest" />
+          <NavigationProperty Name="User" Relationship="Self.FK__UserAddres__U_id__5FB337D6" FromRole="UserAddress" ToRole="Users" />
+        </EntityType>
+        <EntityType Name="User">
+          <Key>
+            <PropertyRef Name="U_id" />
+          </Key>
+          <Property Name="U_id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Name" Type="String" MaxLength="100" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Contact" Type="String" MaxLength="50" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Password" Type="String" MaxLength="255" FixedLength="false" Unicode="true" Nullable="false" />
+          <NavigationProperty Name="BookingRequests" Relationship="Self.FK__BookingReq__U_id__7E37BEF6" FromRole="Users" ToRole="BookingRequest" />
+          <NavigationProperty Name="Dresses" Relationship="Self.FK__Dress__U_id__6A30C649" FromRole="Users" ToRole="Dress" />
+          <NavigationProperty Name="UserAddresses" Relationship="Self.FK__UserAddres__U_id__5FB337D6" FromRole="Users" ToRole="UserAddress" />
+        </EntityType>
+        <Association Name="FK__BookingDe__BR_id__02FC7413">
+          <End Role="BookingRequest" Type="Self.BookingRequest" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="BookingDetail" Type="Self.BookingDetail" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="BookingRequest">
+              <PropertyRef Name="BR_id" />
+            </Principal>
+            <Dependent Role="BookingDetail">
+              <PropertyRef Name="BR_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__BookingDet__D_id__03F0984C">
+          <End Role="Dress" Type="Self.Dress" Multiplicity="1" />
+          <End Role="BookingDetail" Type="Self.BookingDetail" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Dress">
+              <PropertyRef Name="D_id" />
+            </Principal>
+            <Dependent Role="BookingDetail">
+              <PropertyRef Name="D_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__BookingRe__UserA__7F2BE32F">
+          <End Role="UserAddress" Type="Self.UserAddress" Multiplicity="1" />
+          <End Role="BookingRequest" Type="Self.BookingRequest" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="UserAddress">
+              <PropertyRef Name="UA_id" />
+            </Principal>
+            <Dependent Role="BookingRequest">
+              <PropertyRef Name="UserAddressID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__BookingReq__U_id__7E37BEF6">
+          <End Role="Users" Type="Self.User" Multiplicity="1" />
+          <End Role="BookingRequest" Type="Self.BookingRequest" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Users">
+              <PropertyRef Name="U_id" />
+            </Principal>
+            <Dependent Role="BookingRequest">
+              <PropertyRef Name="U_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__Dress__Category___6B24EA82">
+          <End Role="DressCategory" Type="Self.DressCategory" Multiplicity="1" />
+          <End Role="Dress" Type="Self.Dress" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="DressCategory">
+              <PropertyRef Name="Category_id" />
+            </Principal>
+            <Dependent Role="Dress">
+              <PropertyRef Name="Category_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__Dress__SubCatego__6C190EBB">
+          <End Role="SubCategory" Type="Self.SubCategory" Multiplicity="1" />
+          <End Role="Dress" Type="Self.Dress" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="SubCategory">
+              <PropertyRef Name="SubCategory_id" />
+            </Principal>
+            <Dependent Role="Dress">
+              <PropertyRef Name="SubCategory_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__Dress__U_id__6A30C649">
+          <End Role="Users" Type="Self.User" Multiplicity="1" />
+          <End Role="Dress" Type="Self.Dress" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Users">
+              <PropertyRef Name="U_id" />
+            </Principal>
+            <Dependent Role="Dress">
+              <PropertyRef Name="U_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__DressImage__D_id__6EF57B66">
+          <End Role="Dress" Type="Self.Dress" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="DressImages" Type="Self.DressImage" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Dress">
+              <PropertyRef Name="D_id" />
+            </Principal>
+            <Dependent Role="DressImages">
+              <PropertyRef Name="D_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__DressOccas__D_id__71D1E811">
+          <End Role="Dress" Type="Self.Dress" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="DressOccasion" Type="Self.DressOccasion" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Dress">
+              <PropertyRef Name="D_id" />
+            </Principal>
+            <Dependent Role="DressOccasion">
+              <PropertyRef Name="D_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__DressSizes__D_id__778AC167">
+          <End Role="Dress" Type="Self.Dress" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="DressSizes" Type="Self.DressSize" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Dress">
+              <PropertyRef Name="D_id" />
+            </Principal>
+            <Dependent Role="DressSizes">
+              <PropertyRef Name="D_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__SubCatego__Categ__656C112C">
+          <End Role="DressCategory" Type="Self.DressCategory" Multiplicity="1" />
+          <End Role="SubCategory" Type="Self.SubCategory" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="DressCategory">
+              <PropertyRef Name="Category_id" />
+            </Principal>
+            <Dependent Role="SubCategory">
+              <PropertyRef Name="Category_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__DressSize__Size___787EE5A0">
+          <End Role="Sizes" Type="Self.Size" Multiplicity="1" />
+          <End Role="DressSizes" Type="Self.DressSize" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Sizes">
+              <PropertyRef Name="Size_id" />
+            </Principal>
+            <Dependent Role="DressSizes">
+              <PropertyRef Name="Size_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__UserAddres__U_id__5FB337D6">
+          <End Role="Users" Type="Self.User" Multiplicity="1" />
+          <End Role="UserAddress" Type="Self.UserAddress" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Users">
+              <PropertyRef Name="U_id" />
+            </Principal>
+            <Dependent Role="UserAddress">
+              <PropertyRef Name="U_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityContainer Name="RentAWeddingDressEntities" annotation:LazyLoadingEnabled="true">
+          <EntitySet Name="BookingDetails" EntityType="Self.BookingDetail" />
+          <EntitySet Name="BookingRequests" EntityType="Self.BookingRequest" />
+          <EntitySet Name="Dresses" EntityType="Self.Dress" />
+          <EntitySet Name="DressCategories" EntityType="Self.DressCategory" />
+          <EntitySet Name="DressImages" EntityType="Self.DressImage" />
+          <EntitySet Name="DressOccasions" EntityType="Self.DressOccasion" />
+          <EntitySet Name="DressSizes" EntityType="Self.DressSize" />
+          <EntitySet Name="Sizes" EntityType="Self.Size" />
+          <EntitySet Name="SubCategories" EntityType="Self.SubCategory" />
+          <EntitySet Name="UserAddresses" EntityType="Self.UserAddress" />
+          <EntitySet Name="Users" EntityType="Self.User" />
+          <AssociationSet Name="FK__BookingDe__BR_id__02FC7413" Association="Self.FK__BookingDe__BR_id__02FC7413">
+            <End Role="BookingRequest" EntitySet="BookingRequests" />
+            <End Role="BookingDetail" EntitySet="BookingDetails" />
+          </AssociationSet>
+          <AssociationSet Name="FK__BookingDet__D_id__03F0984C" Association="Self.FK__BookingDet__D_id__03F0984C">
+            <End Role="Dress" EntitySet="Dresses" />
+            <End Role="BookingDetail" EntitySet="BookingDetails" />
+          </AssociationSet>
+          <AssociationSet Name="FK__BookingRe__UserA__7F2BE32F" Association="Self.FK__BookingRe__UserA__7F2BE32F">
+            <End Role="UserAddress" EntitySet="UserAddresses" />
+            <End Role="BookingRequest" EntitySet="BookingRequests" />
+          </AssociationSet>
+          <AssociationSet Name="FK__BookingReq__U_id__7E37BEF6" Association="Self.FK__BookingReq__U_id__7E37BEF6">
+            <End Role="Users" EntitySet="Users" />
+            <End Role="BookingRequest" EntitySet="BookingRequests" />
+          </AssociationSet>
+          <AssociationSet Name="FK__Dress__Category___6B24EA82" Association="Self.FK__Dress__Category___6B24EA82">
+            <End Role="DressCategory" EntitySet="DressCategories" />
+            <End Role="Dress" EntitySet="Dresses" />
+          </AssociationSet>
+          <AssociationSet Name="FK__Dress__SubCatego__6C190EBB" Association="Self.FK__Dress__SubCatego__6C190EBB">
+            <End Role="SubCategory" EntitySet="SubCategories" />
+            <End Role="Dress" EntitySet="Dresses" />
+          </AssociationSet>
+          <AssociationSet Name="FK__Dress__U_id__6A30C649" Association="Self.FK__Dress__U_id__6A30C649">
+            <End Role="Users" EntitySet="Users" />
+            <End Role="Dress" EntitySet="Dresses" />
+          </AssociationSet>
+          <AssociationSet Name="FK__DressImage__D_id__6EF57B66" Association="Self.FK__DressImage__D_id__6EF57B66">
+            <End Role="Dress" EntitySet="Dresses" />
+            <End Role="DressImages" EntitySet="DressImages" />
+          </AssociationSet>
+          <AssociationSet Name="FK__DressOccas__D_id__71D1E811" Association="Self.FK__DressOccas__D_id__71D1E811">
+            <End Role="Dress" EntitySet="Dresses" />
+            <End Role="DressOccasion" EntitySet="DressOccasions" />
+          </AssociationSet>
+          <AssociationSet Name="FK__DressSizes__D_id__778AC167" Association="Self.FK__DressSizes__D_id__778AC167">
+            <End Role="Dress" EntitySet="Dresses" />
+            <End Role="DressSizes" EntitySet="DressSizes" />
+          </AssociationSet>
+          <AssociationSet Name="FK__SubCatego__Categ__656C112C" Association="Self.FK__SubCatego__Categ__656C112C">
+            <End Role="DressCategory" EntitySet="DressCategories" />
+            <End Role="SubCategory" EntitySet="SubCategories" />
+          </AssociationSet>
+          <AssociationSet Name="FK__DressSize__Size___787EE5A0" Association="Self.FK__DressSize__Size___787EE5A0">
+            <End Role="Sizes" EntitySet="Sizes" />
+            <End Role="DressSizes" EntitySet="DressSizes" />
+          </AssociationSet>
+          <AssociationSet Name="FK__UserAddres__U_id__5FB337D6" Association="Self.FK__UserAddres__U_id__5FB337D6">
+            <End Role="Users" EntitySet="Users" />
+            <End Role="UserAddress" EntitySet="UserAddresses" />
+          </AssociationSet>
+        </EntityContainer>
+      </Schema>
+    </edmx:ConceptualModels>
+    <!-- C-S mapping content -->
+    <edmx:Mappings>
+      <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
+        <EntityContainerMapping StorageEntityContainer="RentAWeddingDressModelStoreContainer" CdmEntityContainer="RentAWeddingDressEntities">
+          <EntitySetMapping Name="BookingDetails">
+            <EntityTypeMapping TypeName="RentAWeddingDressModel.BookingDetail">
+              <MappingFragment StoreEntitySet="BookingDetail">
+                <ScalarProperty Name="BD_id" ColumnName="BD_id" />
+                <ScalarProperty Name="BR_id" ColumnName="BR_id" />
+                <ScalarProperty Name="D_id" ColumnName="D_id" />
+                <ScalarProperty Name="TotalPrice" ColumnName="TotalPrice" />
+                <ScalarProperty Name="Feedback" ColumnName="Feedback" />
+                <ScalarProperty Name="Rating" ColumnName="Rating" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="BookingRequests">
+            <EntityTypeMapping TypeName="RentAWeddingDressModel.BookingRequest">
+              <MappingFragment StoreEntitySet="BookingRequest">
+                <ScalarProperty Name="BR_id" ColumnName="BR_id" />
+                <ScalarProperty Name="U_id" ColumnName="U_id" />
+                <ScalarProperty Name="UserAddressID" ColumnName="UserAddressID" />
+                <ScalarProperty Name="StartingDate" ColumnName="StartingDate" />
+                <ScalarProperty Name="NoOfDays" ColumnName="NoOfDays" />
+                <ScalarProperty Name="ReturnDate" ColumnName="ReturnDate" />
+                <ScalarProperty Name="Status" ColumnName="Status" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Dresses">
+            <EntityTypeMapping TypeName="RentAWeddingDressModel.Dress">
+              <MappingFragment StoreEntitySet="Dress">
+                <ScalarProperty Name="D_id" ColumnName="D_id" />
+                <ScalarProperty Name="U_id" ColumnName="U_id" />
+                <ScalarProperty Name="Category_id" ColumnName="Category_id" />
+                <ScalarProperty Name="SubCategory_id" ColumnName="SubCategory_id" />
+                <ScalarProperty Name="Condition" ColumnName="Condition" />
+                <ScalarProperty Name="Dtitle" ColumnName="Dtitle" />
+                <ScalarProperty Name="Description" ColumnName="Description" />
+                <ScalarProperty Name="Gender" ColumnName="Gender" />
+                <ScalarProperty Name="RentPrice" ColumnName="RentPrice" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="DressCategories">
+            <EntityTypeMapping TypeName="RentAWeddingDressModel.DressCategory">
+              <MappingFragment StoreEntitySet="DressCategory">
+                <ScalarProperty Name="Category_id" ColumnName="Category_id" />
+                <ScalarProperty Name="Cname" ColumnName="Cname" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="DressImages">
+            <EntityTypeMapping TypeName="RentAWeddingDressModel.DressImage">
+              <MappingFragment StoreEntitySet="DressImages">
+                <ScalarProperty Name="DI_id" ColumnName="DI_id" />
+                <ScalarProperty Name="D_id" ColumnName="D_id" />
+                <ScalarProperty Name="ImgPath" ColumnName="ImgPath" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="DressOccasions">
+            <EntityTypeMapping TypeName="RentAWeddingDressModel.DressOccasion">
+              <MappingFragment StoreEntitySet="DressOccasion">
+                <ScalarProperty Name="Occasion_id" ColumnName="Occasion_id" />
+                <ScalarProperty Name="D_id" ColumnName="D_id" />
+                <ScalarProperty Name="Occasion" ColumnName="Occasion" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="DressSizes">
+            <EntityTypeMapping TypeName="RentAWeddingDressModel.DressSize">
+              <MappingFragment StoreEntitySet="DressSizes">
+                <ScalarProperty Name="DS_id" ColumnName="DS_id" />
+                <ScalarProperty Name="D_id" ColumnName="D_id" />
+                <ScalarProperty Name="Size_id" ColumnName="Size_id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Sizes">
+            <EntityTypeMapping TypeName="RentAWeddingDressModel.Size">
+              <MappingFragment StoreEntitySet="Sizes">
+                <ScalarProperty Name="Size_id" ColumnName="Size_id" />
+                <ScalarProperty Name="SizeName" ColumnName="SizeName" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="SubCategories">
+            <EntityTypeMapping TypeName="RentAWeddingDressModel.SubCategory">
+              <MappingFragment StoreEntitySet="SubCategory">
+                <ScalarProperty Name="SubCategory_id" ColumnName="SubCategory_id" />
+                <ScalarProperty Name="Category_id" ColumnName="Category_id" />
+                <ScalarProperty Name="SCname" ColumnName="SCname" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="UserAddresses">
+            <EntityTypeMapping TypeName="RentAWeddingDressModel.UserAddress">
+              <MappingFragment StoreEntitySet="UserAddress">
+                <ScalarProperty Name="UA_id" ColumnName="UA_id" />
+                <ScalarProperty Name="U_id" ColumnName="U_id" />
+                <ScalarProperty Name="Address" ColumnName="Address" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Users">
+            <EntityTypeMapping TypeName="RentAWeddingDressModel.User">
+              <MappingFragment StoreEntitySet="Users">
+                <ScalarProperty Name="U_id" ColumnName="U_id" />
+                <ScalarProperty Name="Name" ColumnName="Name" />
+                <ScalarProperty Name="Contact" ColumnName="Contact" />
+                <ScalarProperty Name="Password" ColumnName="Password" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+        </EntityContainerMapping>
+      </Mapping>
+    </edmx:Mappings>
+  </edmx:Runtime>
+  <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <Connection>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="MetadataArtifactProcessing" Value="EmbedInOutputAssembly" />
+      </DesignerInfoPropertySet>
+    </Connection>
+    <Options>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="ValidateOnBuild" Value="true" />
+        <DesignerProperty Name="EnablePluralization" Value="true" />
+        <DesignerProperty Name="IncludeForeignKeysInModel" Value="true" />
+        <DesignerProperty Name="UseLegacyProvider" Value="true" />
+        <DesignerProperty Name="CodeGenerationStrategy" Value="None" />
+      </DesignerInfoPropertySet>
+    </Options>
+    <!-- Diagram content (shape and connector positions) -->
+    <Diagrams></Diagrams>
+  </Designer>
+</edmx:Edmx>

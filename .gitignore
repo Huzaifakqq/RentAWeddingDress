@@ -1,0 +1,51 @@
+# Backend (.NET)
+backend/**/bin/
+backend/**/obj/
+backend/**/packages/
+backend/**/.vs/
+backend/**/Debug/
+backend/**/Release/
+backend/**/*.user
+backend/**/*.suo
+backend/**/node_modules/
+backend/**/Content/images/*.jpg
+backend/**/Content/images/*.png
+backend/**/Content/images/*.webp
+
+# Frontend (Flutter)
+frontend/.dart_tool/
+frontend/build/
+frontend/.flutter-plugins
+frontend/.flutter-plugins-dependencies
+frontend/android/.gradle/
+frontend/android/**/build/
+frontend/macos/Flutter/ephemeral/
+frontend/linux/flutter/ephemeral/
+frontend/windows/flutter/ephemeral/
+frontend/**/*.iml
+frontend/**/.metadata
+frontend/pubspec.lock
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+.DS_Store
+
+# Archives
+*.7z
+*.zip
+*.rar
+*.tar.gz
+
+# Database backups (keep .bacpac only)
+database/*.mdf
+database/*.ldf
+database/*.ndf
