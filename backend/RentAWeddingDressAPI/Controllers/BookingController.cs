@@ -11,7 +11,7 @@ namespace RentAWeddingDressAPI.Controllers
     [RoutePrefix("api/bookings")]
     public class BookingController : ApiController
     {
-        RentAWeddingDressEntities db = new RentAWeddingDressEntities();
+        RentAWeddingDressEntities2 db = new RentAWeddingDressEntities2();
 
         // ✅ CHECK AVAILABILITY
         [HttpPost]

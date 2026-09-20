@@ -36,7 +36,6 @@
           <Property Name="U_id" Type="int" Nullable="false" />
           <Property Name="Category_id" Type="int" Nullable="false" />
           <Property Name="SubCategory_id" Type="int" Nullable="false" />
-          <Property Name="Condition" Type="int" Nullable="false" />
           <Property Name="Dtitle" Type="nvarchar" MaxLength="150" Nullable="false" />
           <Property Name="Description" Type="nvarchar(max)" />
           <Property Name="Gender" Type="nvarchar" MaxLength="10" Nullable="false" />
@@ -732,7 +731,6 @@
                 <ScalarProperty Name="U_id" ColumnName="U_id" />
                 <ScalarProperty Name="Category_id" ColumnName="Category_id" />
                 <ScalarProperty Name="SubCategory_id" ColumnName="SubCategory_id" />
-                <ScalarProperty Name="Condition" ColumnName="Condition" />
                 <ScalarProperty Name="Dtitle" ColumnName="Dtitle" />
                 <ScalarProperty Name="Description" ColumnName="Description" />
                 <ScalarProperty Name="Gender" ColumnName="Gender" />

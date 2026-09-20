@@ -6,7 +6,7 @@ namespace RentAWeddingDressAPI.Controllers
     [RoutePrefix("api/users")]
     public class UsersController : ApiController
     {
-        RentAWeddingDressEntities db = new RentAWeddingDressEntities();
+        RentAWeddingDressEntities2 db = new RentAWeddingDressEntities2();
 
         // ✅ ADD ADDRESS
         [HttpPost]
