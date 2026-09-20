@@ -19,6 +19,12 @@ namespace RentAWeddingDressAPI.DTOs
 
         public int Condition { get; set; }
 
+        public int AgeYears { get; set; }
+
+        public int AgeMonths { get; set; }
+
+        public int AgeDays { get; set; }
+
         public decimal RentPrice { get; set; }
 
         public string Description { get; set; }

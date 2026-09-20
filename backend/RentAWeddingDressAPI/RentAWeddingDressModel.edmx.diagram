@@ -4,31 +4,31 @@
   <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
     <!-- Diagram content (shape and connector positions) -->
     <edmx:Diagrams>
-      <Diagram DiagramId="c201177a2a2f4d87876c9ab984cdcb0c" Name="Diagram1" ZoomLevel="35">
-        <EntityTypeShape EntityType="RentAWeddingDressModel.BookingDetail" Width="1.5" PointX="7.5" PointY="12.125" IsExpanded="true" />
-        <EntityTypeShape EntityType="RentAWeddingDressModel.BookingRequest" Width="1.5" PointX="5.25" PointY="12.375" IsExpanded="true" />
-        <EntityTypeShape EntityType="RentAWeddingDressModel.Dress" Width="1.5" PointX="3" PointY="7.5" IsExpanded="true" />
-        <EntityTypeShape EntityType="RentAWeddingDressModel.DressCategory" Width="1.5" PointX="0.75" PointY="5.25" IsExpanded="true" />
-        <EntityTypeShape EntityType="RentAWeddingDressModel.DressImage" Width="1.5" PointX="5.25" PointY="7.375" IsExpanded="true" />
-        <EntityTypeShape EntityType="RentAWeddingDressModel.DressOccasion" Width="1.5" PointX="5.25" PointY="3.875" IsExpanded="true" />
-        <EntityTypeShape EntityType="RentAWeddingDressModel.DressSize" Width="1.5" PointX="8.25" PointY="8.5" IsExpanded="true" />
-        <EntityTypeShape EntityType="RentAWeddingDressModel.Size" Width="1.5" PointX="6" PointY="0.75" IsExpanded="true" />
-        <EntityTypeShape EntityType="RentAWeddingDressModel.SubCategory" Width="1.5" PointX="0.75" PointY="11.875" IsExpanded="true" />
-        <EntityTypeShape EntityType="RentAWeddingDressModel.UserAddress" Width="1.5" PointX="3" PointY="17.375" IsExpanded="true" />
-        <EntityTypeShape EntityType="RentAWeddingDressModel.User" Width="1.5" PointX="0.75" PointY="8.375" IsExpanded="true" />
-        <AssociationConnector Association="RentAWeddingDressModel.FK__BookingDe__BR_id__02FC7413" ManuallyRouted="false" />
-        <AssociationConnector Association="RentAWeddingDressModel.FK__BookingDet__D_id__03F0984C" ManuallyRouted="false" />
-        <AssociationConnector Association="RentAWeddingDressModel.FK__BookingRe__UserA__7F2BE32F" ManuallyRouted="false" />
-        <AssociationConnector Association="RentAWeddingDressModel.FK__BookingReq__U_id__7E37BEF6" ManuallyRouted="false" />
-        <AssociationConnector Association="RentAWeddingDressModel.FK__Dress__Category___6B24EA82" ManuallyRouted="false" />
-        <AssociationConnector Association="RentAWeddingDressModel.FK__Dress__SubCatego__6C190EBB" ManuallyRouted="false" />
-        <AssociationConnector Association="RentAWeddingDressModel.FK__Dress__U_id__6A30C649" ManuallyRouted="false" />
-        <AssociationConnector Association="RentAWeddingDressModel.FK__DressImage__D_id__6EF57B66" ManuallyRouted="false" />
-        <AssociationConnector Association="RentAWeddingDressModel.FK__DressOccas__D_id__71D1E811" ManuallyRouted="false" />
-        <AssociationConnector Association="RentAWeddingDressModel.FK__DressSizes__D_id__778AC167" ManuallyRouted="false" />
-        <AssociationConnector Association="RentAWeddingDressModel.FK__SubCatego__Categ__656C112C" ManuallyRouted="false" />
-        <AssociationConnector Association="RentAWeddingDressModel.FK__DressSize__Size___787EE5A0" ManuallyRouted="false" />
-        <AssociationConnector Association="RentAWeddingDressModel.FK__UserAddres__U_id__5FB337D6" ManuallyRouted="false" />
+      <Diagram DiagramId="24b93dd019114e9a92f641b6df2ddb25" Name="Diagram1" ZoomLevel="74">
+        <EntityTypeShape EntityType="RentAWeddingDressModel.BookingDetail" Width="1.5" PointX="7.5" PointY="10.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="RentAWeddingDressModel.BookingRequest" Width="1.5" PointX="5.25" PointY="11.25" IsExpanded="true" />
+        <EntityTypeShape EntityType="RentAWeddingDressModel.Dress" Width="1.5" PointX="3" PointY="5.875" IsExpanded="true" />
+        <EntityTypeShape EntityType="RentAWeddingDressModel.DressCategory" Width="1.5" PointX="0.75" PointY="4" IsExpanded="true" />
+        <EntityTypeShape EntityType="RentAWeddingDressModel.DressImage" Width="1.5" PointX="5.25" PointY="6.125" IsExpanded="true" />
+        <EntityTypeShape EntityType="RentAWeddingDressModel.DressOccasion" Width="1.5" PointX="5.25" PointY="8.625" IsExpanded="true" />
+        <EntityTypeShape EntityType="RentAWeddingDressModel.DressSize" Width="1.5" PointX="8.25" PointY="7.25" IsExpanded="true" />
+        <EntityTypeShape EntityType="RentAWeddingDressModel.Size" Width="1.5" PointX="6" PointY="3.5" IsExpanded="true" />
+        <EntityTypeShape EntityType="RentAWeddingDressModel.SubCategory" Width="1.5" PointX="0.75" PointY="10.5" IsExpanded="true" />
+        <EntityTypeShape EntityType="RentAWeddingDressModel.UserAddress" Width="1.5" PointX="3" PointY="16.375" IsExpanded="true" />
+        <EntityTypeShape EntityType="RentAWeddingDressModel.User" Width="1.5" PointX="0.75" PointY="7" IsExpanded="true" />
+        <AssociationConnector Association="RentAWeddingDressModel.FK__BookingDe__BR_id__73BA3083" ManuallyRouted="false" />
+        <AssociationConnector Association="RentAWeddingDressModel.FK__BookingDet__D_id__74AE54BC" ManuallyRouted="false" />
+        <AssociationConnector Association="RentAWeddingDressModel.FK__BookingRe__UserA__76969D2E" ManuallyRouted="false" />
+        <AssociationConnector Association="RentAWeddingDressModel.FK__BookingReq__U_id__75A278F5" ManuallyRouted="false" />
+        <AssociationConnector Association="RentAWeddingDressModel.FK__Dress__Category___787EE5A0" ManuallyRouted="false" />
+        <AssociationConnector Association="RentAWeddingDressModel.FK__Dress__SubCatego__797309D9" ManuallyRouted="false" />
+        <AssociationConnector Association="RentAWeddingDressModel.FK__Dress__U_id__778AC167" ManuallyRouted="false" />
+        <AssociationConnector Association="RentAWeddingDressModel.FK__DressImage__D_id__7A672E12" ManuallyRouted="false" />
+        <AssociationConnector Association="RentAWeddingDressModel.FK__DressOccas__D_id__7B5B524B" ManuallyRouted="false" />
+        <AssociationConnector Association="RentAWeddingDressModel.FK__DressSizes__D_id__7C4F7684" ManuallyRouted="false" />
+        <AssociationConnector Association="RentAWeddingDressModel.FK__SubCatego__Categ__7E37BEF6" ManuallyRouted="false" />
+        <AssociationConnector Association="RentAWeddingDressModel.FK__DressSize__Size___7D439ABD" ManuallyRouted="false" />
+        <AssociationConnector Association="RentAWeddingDressModel.FK__UserAddres__U_id__7F2BE32F" ManuallyRouted="false" />
       </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>

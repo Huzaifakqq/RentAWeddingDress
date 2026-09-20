@@ -13,10 +13,10 @@ namespace RentAWeddingDressAPI
     using System.Data.Entity;
     using System.Data.Entity.Infrastructure;
     
-    public partial class RentAWeddingDressEntities : DbContext
+    public partial class RentAWeddingDressEntities2 : DbContext
     {
-        public RentAWeddingDressEntities()
-            : base("name=RentAWeddingDressEntities")
+        public RentAWeddingDressEntities2()
+            : base("name=RentAWeddingDressEntities2")
         {
         }
     

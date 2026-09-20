@@ -124,7 +124,8 @@ class _DressDetailsScreenState extends State<DressDetailsScreen> {
                             "Occasion:",
                             dress!.occasions.join(", "),
                           ),
-                          buildInfoRow("Condition:", dress!.condition),
+                          buildInfoRow("Condition:", "${dress!.condition}/10"),
+                          buildInfoRow("Dress Age:", dress!.ageDisplay),
                           buildInfoRow(
                             "Category:",
                             "${dress!.category} (${dress!.subCategory})",

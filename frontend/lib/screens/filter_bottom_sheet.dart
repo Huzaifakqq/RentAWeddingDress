@@ -25,7 +25,12 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
   final TextEditingController minPriceController = TextEditingController();
   final TextEditingController maxPriceController = TextEditingController();
 
-  double conditionValue = 0; // 0 means no filter
+  final TextEditingController fromYearsController = TextEditingController();
+  final TextEditingController fromMonthsController = TextEditingController();
+  final TextEditingController toYearsController = TextEditingController();
+  final TextEditingController toMonthsController = TextEditingController();
+
+  double conditionValue = 0;
 
   @override
   void initState() {
@@ -66,6 +71,20 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
         conditionValue = (filters["Condition"] as num).toDouble();
       }
 
+      // ✅ ✅ RESTORE AGE FILTER
+      if (filters["FromAgeYears"] != null) {
+        fromYearsController.text = filters["FromAgeYears"].toString();
+      }
+      if (filters["FromAgeMonths"] != null) {
+        fromMonthsController.text = filters["FromAgeMonths"].toString();
+      }
+      if (filters["ToAgeYears"] != null) {
+        toYearsController.text = filters["ToAgeYears"].toString();
+      }
+      if (filters["ToAgeMonths"] != null) {
+        toMonthsController.text = filters["ToAgeMonths"].toString();
+      }
+
       if (selectedCategoryId != null) {
         loadSubCategories(selectedCategoryId!);
       }
@@ -96,6 +115,11 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
       minPriceController.clear();
       maxPriceController.clear();
       conditionValue = 0;
+
+      fromYearsController.clear();
+      fromMonthsController.clear();
+      toYearsController.clear();
+      toMonthsController.clear();
     });
   }
 
@@ -249,8 +273,6 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
 
             const SizedBox(height: 15),
 
-            const SizedBox(height: 20),
-
             const Text(
               "Condition",
               style: TextStyle(fontWeight: FontWeight.bold),
@@ -271,6 +293,57 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                   conditionValue = value;
                 });
               },
+            ),
+
+            const SizedBox(height: 20),
+
+            const Text(
+              "Dress Age",
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+
+            const SizedBox(height: 10),
+
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: fromYearsController,
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(labelText: "From Years"),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: TextField(
+                    controller: fromMonthsController,
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(labelText: "From Months"),
+                  ),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 10),
+
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: toYearsController,
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(labelText: "To Years"),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: TextField(
+                    controller: toMonthsController,
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(labelText: "To Months"),
+                  ),
+                ),
+              ],
             ),
             ElevatedButton(
               onPressed: () async {
@@ -323,6 +396,18 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                             : null,
                         "MaxPrice": maxPriceController.text.isNotEmpty
                             ? double.parse(maxPriceController.text)
+                            : null,
+                        "FromAgeYears": fromYearsController.text.isNotEmpty
+                            ? int.parse(fromYearsController.text)
+                            : null,
+                        "FromAgeMonths": fromMonthsController.text.isNotEmpty
+                            ? int.parse(fromMonthsController.text)
+                            : null,
+                        "ToAgeYears": toYearsController.text.isNotEmpty
+                            ? int.parse(toYearsController.text)
+                            : null,
+                        "ToAgeMonths": toMonthsController.text.isNotEmpty
+                            ? int.parse(toMonthsController.text)
                             : null,
                         "Condition": conditionValue > 0
                             ? conditionValue.toInt()
