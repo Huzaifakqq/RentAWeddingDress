@@ -12,7 +12,8 @@ namespace RentAWeddingDressAPI.DTOs
         public string Title { get; set; }
         public decimal RentPrice { get; set; }
         public string Gender { get; set; }
-        public string Condition { get; set; }
+        public string AgeDisplay { get; set; }
+        public int Condition { get; set; }
         public string Category { get; set; }
         public string SubCategory { get; set; }
         public string Description { get; set; }

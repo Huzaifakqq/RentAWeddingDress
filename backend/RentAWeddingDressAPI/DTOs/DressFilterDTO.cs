@@ -23,5 +23,9 @@ namespace RentAWeddingDressAPI.DTOs
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
         public int? Condition { get; set; }
+        public int? FromAgeYears { get; set; }
+        public int? FromAgeMonths { get; set; }
+        public int? ToAgeYears { get; set; }
+        public int? ToAgeMonths { get; set; }
     }
 }

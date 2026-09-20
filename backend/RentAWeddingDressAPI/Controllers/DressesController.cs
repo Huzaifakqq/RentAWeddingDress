@@ -105,6 +105,19 @@ namespace RentAWeddingDressAPI.Controllers
                 query = query.Where(d => d.Condition == filter.Condition.Value);
             }
 
+            // ✅ Age Filter
+            if (filter.FromAgeYears.HasValue || filter.FromAgeMonths.HasValue ||
+                filter.ToAgeYears.HasValue || filter.ToAgeMonths.HasValue)
+            {
+                int fromMonths = ((filter.FromAgeYears ?? 0) * 12) + (filter.FromAgeMonths ?? 0);
+                int toMonths = ((filter.ToAgeYears ?? 0) * 12) + (filter.ToAgeMonths ?? 0);
+                if (toMonths == 0) toMonths = 999;
+
+                query = query.Where(d =>
+                    (((d.AgeYears ?? 0) * 12) + (d.AgeMonths ?? 0)) >= fromMonths &&
+                    (((d.AgeYears ?? 0) * 12) + (d.AgeMonths ?? 0)) <= toMonths);
+            }
+
             // ✅ Final Result
             var result = query.Select(d => new DressListDTO
             {
@@ -141,8 +154,9 @@ namespace RentAWeddingDressAPI.Controllers
                 Gender = dress.Gender,
                 OwnerId = dress.U_id,
 
-                // ✅ Show Condition as 9/10
-                Condition = dress.Condition + "/10",
+                // ✅ Show Dress Age + Condition
+                Condition = dress.Condition ?? 0,
+                AgeDisplay = FormatAge(dress.AgeYears, dress.AgeMonths, dress.AgeDays),
 
                 Category = dress.DressCategory.Cname,
                 SubCategory = dress.SubCategory.SCname,
@@ -244,6 +258,9 @@ namespace RentAWeddingDressAPI.Controllers
                 SubCategory_id = model.SubCategoryId,
                 Gender = model.Gender,
                 Condition = model.Condition,
+                AgeYears = model.AgeYears,
+                AgeMonths = model.AgeMonths,
+                AgeDays = model.AgeDays,
                 RentPrice = model.RentPrice,
                 Description = model.Description
             };
@@ -337,6 +354,18 @@ namespace RentAWeddingDressAPI.Controllers
                 }).ToList();
 
             return Ok(sizes);
+        }
+
+        private string FormatAge(int? years, int? months, int? days)
+        {
+            var parts = new System.Collections.Generic.List<string>();
+            int y = years ?? 0;
+            int m = months ?? 0;
+            int d = days ?? 0;
+            if (y > 0) parts.Add($"{y} year{(y > 1 ? "s" : "")}");
+            if (m > 0) parts.Add($"{m} month{(m > 1 ? "s" : "")}");
+            if (d > 0) parts.Add($"{d} day{(d > 1 ? "s" : "")}");
+            return parts.Count > 0 ? string.Join(" ", parts) + " old" : "New";
         }
     }
 }

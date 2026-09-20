@@ -26,11 +26,14 @@ namespace RentAWeddingDressAPI
         public int U_id { get; set; }
         public int Category_id { get; set; }
         public int SubCategory_id { get; set; }
-        public int Condition { get; set; }
         public string Dtitle { get; set; }
         public string Description { get; set; }
         public string Gender { get; set; }
         public decimal RentPrice { get; set; }
+        public Nullable<int> AgeYears { get; set; }
+        public Nullable<int> AgeMonths { get; set; }
+        public Nullable<int> AgeDays { get; set; }
+        public Nullable<int> Condition { get; set; }
     
         public virtual ICollection<BookingDetail> BookingDetails { get; set; }
         public virtual DressCategory DressCategory { get; set; }

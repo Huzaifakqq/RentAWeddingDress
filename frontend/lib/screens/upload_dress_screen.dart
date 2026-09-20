@@ -30,6 +30,10 @@ class _UploadDressScreenState extends State<UploadDressScreen> {
   String selectedGender = "Male";
   double conditionValue = 5;
 
+  final TextEditingController yearsController = TextEditingController(text: "0");
+  final TextEditingController monthsController = TextEditingController(text: "0");
+  final TextEditingController daysController = TextEditingController(text: "0");
+
   List<String> selectedOccasions = [];
   List<int> selectedSizeIds = [];
 
@@ -102,6 +106,9 @@ class _UploadDressScreenState extends State<UploadDressScreen> {
       "SubCategoryId": selectedSubCategoryId,
       "Gender": selectedGender,
       "Condition": conditionValue.toInt(),
+      "AgeYears": int.parse(yearsController.text),
+      "AgeMonths": int.parse(monthsController.text),
+      "AgeDays": int.parse(daysController.text),
       "RentPrice": double.parse(priceController.text),
       "Description": descriptionController.text,
       "Occasions": selectedOccasions,
@@ -343,6 +350,52 @@ class _UploadDressScreenState extends State<UploadDressScreen> {
                   conditionValue = val;
                 });
               },
+            ),
+
+            const SizedBox(height: 25),
+
+            // ✅ DRESS AGE
+            const Text(
+              "Dress Age",
+              style: TextStyle(fontWeight: FontWeight.w600),
+            ),
+            const SizedBox(height: 10),
+
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: yearsController,
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(
+                      labelText: "Years",
+                      hintText: "0",
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: TextField(
+                    controller: monthsController,
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(
+                      labelText: "Months",
+                      hintText: "0",
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: TextField(
+                    controller: daysController,
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(
+                      labelText: "Days",
+                      hintText: "0",
+                    ),
+                  ),
+                ),
+              ],
             ),
 
             const SizedBox(height: 25),

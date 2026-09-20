@@ -27,7 +27,8 @@ class DressDetailsModel {
   final String title;
   final double rentPrice;
   final String gender;
-  final String condition;
+  final int condition;
+  final String ageDisplay;
   final String category;
   final String subCategory;
   final String description;
@@ -44,6 +45,7 @@ class DressDetailsModel {
     required this.rentPrice,
     required this.gender,
     required this.condition,
+    required this.ageDisplay,
     required this.category,
     required this.subCategory,
     required this.description,
@@ -62,6 +64,7 @@ class DressDetailsModel {
       rentPrice: (json['RentPrice'] as num).toDouble(),
       gender: json['Gender'],
       condition: json['Condition'],
+      ageDisplay: json['AgeDisplay'],
       category: json['Category'],
       subCategory: json['SubCategory'],
       description: json['Description'] ?? "",
