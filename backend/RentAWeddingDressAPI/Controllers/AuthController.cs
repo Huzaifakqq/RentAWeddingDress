@@ -12,7 +12,7 @@ namespace RentAWeddingDressAPI.Controllers
     [RoutePrefix("api/auth")]
     public class AuthController : ApiController
     {
-        RentAWeddingDressEntities db = new RentAWeddingDressEntities();
+        RentAWeddingDressEntities2 db = new RentAWeddingDressEntities2();
 
         [HttpPost]
         [Route("register")]

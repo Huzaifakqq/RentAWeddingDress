@@ -12,7 +12,7 @@ namespace RentAWeddingDressAPI.Controllers
     [RoutePrefix("api/dresses")]
     public class DressesController : ApiController
     {
-        RentAWeddingDressEntities db = new RentAWeddingDressEntities();
+        RentAWeddingDressEntities2 db = new RentAWeddingDressEntities2();
 
         // ✅ FILTER API
         [HttpPost]
@@ -236,9 +236,6 @@ namespace RentAWeddingDressAPI.Controllers
             if (string.IsNullOrEmpty(model.Dtitle))
                 return BadRequest("Title is required.");
 
-            if (model.Condition < 1 || model.Condition > 10)
-                return BadRequest("Condition must be between 1 and 10.");
-
             var dress = new Dress
             {
                 U_id = model.UserId,
@@ -342,5 +339,4 @@ namespace RentAWeddingDressAPI.Controllers
             return Ok(sizes);
         }
     }
-
 }

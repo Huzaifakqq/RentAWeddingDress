@@ -8,7 +8,7 @@ namespace RentAWeddingDressAPI.Controllers
     [RoutePrefix("api/rentals")]
     public class RentalController : ApiController
     {
-        RentAWeddingDressEntities db = new RentAWeddingDressEntities();
+        RentAWeddingDressEntities2 db = new RentAWeddingDressEntities2();
 
         // ✅ 1. GET CUSTOMER RENTALS
         [HttpGet]

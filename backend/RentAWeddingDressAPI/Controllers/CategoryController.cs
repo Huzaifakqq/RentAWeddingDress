@@ -10,7 +10,7 @@ namespace RentAWeddingDressAPI.Controllers
     [RoutePrefix("api/categories")]
     public class CategoryController : ApiController
     {
-        RentAWeddingDressEntities db = new RentAWeddingDressEntities();
+        RentAWeddingDressEntities2 db = new RentAWeddingDressEntities2();
 
         // ✅ Get All Categories (First Dropdown)
         [HttpGet]
