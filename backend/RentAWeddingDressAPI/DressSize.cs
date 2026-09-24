@@ -17,6 +17,7 @@ namespace RentAWeddingDressAPI
         public int DS_id { get; set; }
         public int D_id { get; set; }
         public int Size_id { get; set; }
+        public Nullable<int> Stock { get; set; }
     
         public virtual Dress Dress { get; set; }
         public virtual Size Size { get; set; }

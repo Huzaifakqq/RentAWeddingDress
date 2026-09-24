@@ -21,6 +21,7 @@ namespace RentAWeddingDressAPI.DTOs
         public List<string> Images { get; set; }
         public List<string> Occasions { get; set; }
         public List<string> Sizes { get; set; }
+        public List<SizeStockDTO> SizeStocks { get; set; }
 
         public double AverageRating { get; set; }
 
@@ -33,5 +34,12 @@ namespace RentAWeddingDressAPI.DTOs
         public DateTime Date { get; set; }
         public int Rating { get; set; }
         public string Feedback { get; set; }
+    }
+
+    public class SizeStockDTO
+    {
+        public int SizeId { get; set; }
+        public string SizeName { get; set; }
+        public int Stock { get; set; }
     }
 }

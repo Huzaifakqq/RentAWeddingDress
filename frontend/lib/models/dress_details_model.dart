@@ -21,6 +21,26 @@ class ReviewModel {
   }
 }
 
+class SizeStockModel {
+  final int sizeId;
+  final String sizeName;
+  final int stock;
+
+  SizeStockModel({
+    required this.sizeId,
+    required this.sizeName,
+    required this.stock,
+  });
+
+  factory SizeStockModel.fromJson(Map<String, dynamic> json) {
+    return SizeStockModel(
+      sizeId: json['SizeId'],
+      sizeName: json['SizeName'],
+      stock: json['Stock'],
+    );
+  }
+}
+
 class DressDetailsModel {
   final int id;
   final int ownerId;
@@ -35,6 +55,7 @@ class DressDetailsModel {
   final List<String> images;
   final List<String> occasions;
   final List<String> sizes;
+  final List<SizeStockModel> sizeStocks;
   final double averageRating;
   final List<ReviewModel> reviews;
 
@@ -52,6 +73,7 @@ class DressDetailsModel {
     required this.images,
     required this.occasions,
     required this.sizes,
+    required this.sizeStocks,
     required this.averageRating,
     required this.reviews,
   });
@@ -71,6 +93,9 @@ class DressDetailsModel {
       images: List<String>.from(json['Images']),
       occasions: List<String>.from(json['Occasions']),
       sizes: List<String>.from(json['Sizes']),
+      sizeStocks: (json['SizeStocks'] as List)
+          .map((e) => SizeStockModel.fromJson(e))
+          .toList(),
       averageRating: (json['AverageRating'] as num).toDouble(),
       reviews: (json['Reviews'] as List)
           .map((e) => ReviewModel.fromJson(e))

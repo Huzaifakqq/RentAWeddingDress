@@ -20,6 +20,8 @@ namespace RentAWeddingDressAPI
         public decimal TotalPrice { get; set; }
         public string Feedback { get; set; }
         public Nullable<int> Rating { get; set; }
+        public Nullable<int> Quantity { get; set; }
+        public Nullable<int> Size_id { get; set; }
     
         public virtual BookingRequest BookingRequest { get; set; }
         public virtual Dress Dress { get; set; }

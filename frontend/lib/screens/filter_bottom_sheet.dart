@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import '../services/dress_service.dart';
 
 class FilterBottomSheet extends StatefulWidget {
@@ -31,6 +32,12 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
   final TextEditingController toMonthsController = TextEditingController();
 
   double conditionValue = 0;
+
+  // ✅ LOCATION FILTER
+  bool nearMe = false;
+  double maxKm = 50;
+  double? userLat;
+  double? userLng;
 
   @override
   void initState() {
@@ -85,6 +92,14 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
         toMonthsController.text = filters["ToAgeMonths"].toString();
       }
 
+      // ✅ RESTORE LOCATION FILTER
+      nearMe = filters["UserLat"] != null;
+      if (filters["UserLat"] != null) userLat = filters["UserLat"];
+      if (filters["UserLng"] != null) userLng = filters["UserLng"];
+      if (filters["MaxKm"] != null) {
+        maxKm = (filters["MaxKm"] as num).toDouble();
+      }
+
       if (selectedCategoryId != null) {
         loadSubCategories(selectedCategoryId!);
       }
@@ -120,7 +135,51 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
       fromMonthsController.clear();
       toYearsController.clear();
       toMonthsController.clear();
+
+      nearMe = false;
+      maxKm = 50;
+      userLat = null;
+      userLng = null;
     });
+  }
+
+  // ✅ GET GPS FOR NEAR ME FILTER
+  Future<void> getMyLocation() async {
+    try {
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Turn on GPS first")),
+        );
+        return;
+      }
+
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+      }
+
+      if (permission == LocationPermission.denied) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Location permission denied")),
+        );
+        return;
+      }
+
+      Position pos = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      );
+
+      setState(() {
+        userLat = pos.latitude;
+        userLng = pos.longitude;
+        nearMe = true;
+      });
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Location error: $e")));
+    }
   }
 
   @override
@@ -274,6 +333,50 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
             const SizedBox(height: 15),
 
             const Text(
+              "Near Me",
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+
+            SwitchListTile(
+              value: nearMe,
+              contentPadding: EdgeInsets.zero,
+              title: Text(nearMe ? "Filtering nearby (ON)" : "Near me (OFF)"),
+              onChanged: (val) async {
+                if (val) {
+                  await getMyLocation();
+                } else {
+                  setState(() {
+                    nearMe = false;
+                    userLat = null;
+                    userLng = null;
+                  });
+                }
+              },
+            ),
+
+            if (nearMe)
+              Row(
+                children: [
+                  const Text("Within "),
+                  Expanded(
+                    child: Slider(
+                      value: maxKm,
+                      min: 5,
+                      max: 100,
+                      divisions: 19,
+                      label: "${maxKm.toInt()} km",
+                      onChanged: (val) {
+                        setState(() => maxKm = val);
+                      },
+                    ),
+                  ),
+                  Text("${maxKm.toInt()} km"),
+                ],
+              ),
+
+            const SizedBox(height: 15),
+
+            const Text(
               "Condition",
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
@@ -412,6 +515,9 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                         "Condition": conditionValue > 0
                             ? conditionValue.toInt()
                             : null,
+                        "UserLat": nearMe ? userLat : null,
+                        "UserLng": nearMe ? userLng : null,
+                        "MaxKm": nearMe ? maxKm : null,
                       });
                     },
                     child: const Text("Apply Filters"),

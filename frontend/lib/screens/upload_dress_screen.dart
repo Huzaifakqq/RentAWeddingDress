@@ -36,6 +36,7 @@ class _UploadDressScreenState extends State<UploadDressScreen> {
 
   List<String> selectedOccasions = [];
   List<int> selectedSizeIds = [];
+  Map<int, int> sizeStock = {};
 
   final List<String> occasionOptions = ["Mehndi", "Barat", "Walima", "Nikkah"];
 
@@ -113,6 +114,7 @@ class _UploadDressScreenState extends State<UploadDressScreen> {
       "Description": descriptionController.text,
       "Occasions": selectedOccasions,
       "SizeIds": selectedSizeIds,
+      "SizeStock": sizeStock.map((k, v) => MapEntry(k.toString(), v)),
       "ImagePaths": uploadedImagePaths,
     });
 
@@ -429,11 +431,52 @@ class _UploadDressScreenState extends State<UploadDressScreen> {
                       selected
                           ? selectedSizeIds.remove(id)
                           : selectedSizeIds.add(id);
+                      if (!selected) sizeStock[id] = 1;
                     });
                   },
                 );
               }).toList(),
             ),
+
+            // ✅ STOCK INPUTS FOR EACH SELECTED SIZE
+            if (selectedSizeIds.isNotEmpty) ...[
+              const SizedBox(height: 15),
+              const Text(
+                "Stock per Size",
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
+              const SizedBox(height: 10),
+              ...selectedSizeIds.map((sizeId) {
+                final sizeName = sizes
+                    .firstWhere((s) => s['Size_id'] == sizeId)['SizeName'];
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 10),
+                  child: Row(
+                    children: [
+                      SizedBox(
+                        width: 80,
+                        child: Text(sizeName),
+                      ),
+                      SizedBox(
+                        width: 80,
+                        child: TextField(
+                          keyboardType: TextInputType.number,
+                          decoration: const InputDecoration(
+                            labelText: "Qty",
+                          ),
+                          controller: TextEditingController(
+                            text: (sizeStock[sizeId] ?? 1).toString(),
+                          ),
+                          onChanged: (val) {
+                            sizeStock[sizeId] = int.tryParse(val) ?? 1;
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }),
+            ],
 
             const SizedBox(height: 25),
 
