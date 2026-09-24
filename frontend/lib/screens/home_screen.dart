@@ -1,12 +1,75 @@
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:rent_a_wedding_dress/models/user_session.dart';
 import 'package:rent_a_wedding_dress/screens/login_screen.dart';
 import 'package:rent_a_wedding_dress/screens/my_rentals_screen.dart';
 import 'package:rent_a_wedding_dress/screens/upload_dress_screen.dart';
+import 'package:rent_a_wedding_dress/services/dress_service.dart';
 import 'dresses_screen.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  bool isSettingLocation = false;
+
+  // ✅ One button sets shop location for ALL dresses of this owner
+  Future<void> setShopLocation() async {
+    if (UserSession.userId == null) return;
+
+    setState(() => isSettingLocation = true);
+
+    try {
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        _showMessage("Turn on GPS first");
+        return;
+      }
+
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+      }
+      if (permission == LocationPermission.denied ||
+          permission == LocationPermission.deniedForever) {
+        _showMessage("Location permission denied");
+        return;
+      }
+
+      Position pos = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      );
+
+      final result = await DressService.updateShopLocation(
+        UserSession.userId!,
+        pos.latitude,
+        pos.longitude,
+      );
+
+      if (result != null && result["Count"] != null) {
+        _showMessage(
+          "Shop location updated for ${result["Count"]} dress(es)",
+        );
+      } else {
+        _showMessage(result?["Error"] ?? "No dresses found to update");
+      }
+    } catch (e) {
+      _showMessage("Location error: $e");
+    } finally {
+      if (mounted) setState(() => isSettingLocation = false);
+    }
+  }
+
+  void _showMessage(String text) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(text)));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,8 +87,7 @@ class HomeScreen extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const SizedBox(width: 40), // for balance
-
+                    const SizedBox(width: 40),
                     Row(
                       children: [
                         Image.asset("assets/images/logo.png", height: 28),
@@ -39,7 +101,6 @@ class HomeScreen extends StatelessWidget {
                         ),
                       ],
                     ),
-
                     IconButton(
                       icon: const Icon(Icons.logout),
                       onPressed: () {
@@ -49,6 +110,36 @@ class HomeScreen extends StatelessWidget {
                   ],
                 ),
               ),
+
+              // ✅ SHOP LOCATION — one tap updates all dresses
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    style: OutlinedButton.styleFrom(
+                      side: const BorderSide(color: Colors.black),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                    ),
+                    onPressed: isSettingLocation ? null : setShopLocation,
+                    icon: isSettingLocation
+                        ? const SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Icon(Icons.store, color: Colors.black),
+                    label: const Text(
+                      "Set Shop Location (updates all dresses)",
+                      style: TextStyle(color: Colors.black),
+                    ),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 12),
 
               // BANNER
               Stack(

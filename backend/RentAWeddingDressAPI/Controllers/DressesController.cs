@@ -118,6 +118,27 @@ namespace RentAWeddingDressAPI.Controllers
                     (((d.AgeYears ?? 0) * 12) + (d.AgeMonths ?? 0)) <= toMonths);
             }
 
+            // ✅ LOCATION FILTER (bounding box, simple for exam)
+            if (filter.UserLat.HasValue && filter.UserLng.HasValue)
+            {
+                double userLat = filter.UserLat.Value;
+                double userLng = filter.UserLng.Value;
+                double maxKm = filter.MaxKm ?? 50;
+
+                double latDelta = maxKm / 111.0;
+                double lngDelta = maxKm /
+                    (111.0 * Math.Cos(userLat * Math.PI / 180.0));
+
+                decimal minLat = (decimal)(userLat - latDelta);
+                decimal maxLat = (decimal)(userLat + latDelta);
+                decimal minLng = (decimal)(userLng - lngDelta);
+                decimal maxLng = (decimal)(userLng + lngDelta);
+
+                query = query.Where(d =>
+                    d.Latitude >= minLat && d.Latitude <= maxLat &&
+                    d.Longitude >= minLng && d.Longitude <= maxLng);
+            }
+
             // ✅ Final Result
             var result = query.Select(d => new DressListDTO
             {
@@ -173,6 +194,14 @@ namespace RentAWeddingDressAPI.Controllers
                 Sizes = dress.DressSizes
                                 .Select(s => s.Size.SizeName)
                                 .ToList(),
+
+                SizeStocks = dress.DressSizes
+                                .Select(s => new SizeStockDTO
+                                {
+                                    SizeId = s.Size_id,
+                                    SizeName = s.Size.SizeName,
+                                    Stock = s.Stock ?? 1
+                                }).ToList(),
 
                 AverageRating = dress.BookingDetails
                                 .Where(b => b.Rating != null)
@@ -294,15 +323,20 @@ namespace RentAWeddingDressAPI.Controllers
                 }
             }
 
-            // ✅ Save Sizes
+            // ✅ Save Sizes with Stock
             if (model.SizeIds != null)
             {
                 foreach (var sizeId in model.SizeIds)
                 {
+                    int stock = 1;
+                    if (model.SizeStock != null && model.SizeStock.ContainsKey(sizeId))
+                        stock = model.SizeStock[sizeId];
+
                     db.DressSizes.Add(new DressSize
                     {
                         D_id = dress.D_id,
-                        Size_id = sizeId
+                        Size_id = sizeId,
+                        Stock = stock
                     });
                 }
             }

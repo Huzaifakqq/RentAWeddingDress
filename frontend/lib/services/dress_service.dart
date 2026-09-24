@@ -171,4 +171,46 @@ class DressService {
     }
     return [];
   }
+
+  // ✅ SET SHOP LOCATION — one tap updates ALL dresses of this owner
+  static Future<Map<String, dynamic>?> updateShopLocation(
+    int userId,
+    double lat,
+    double lng,
+  ) async {
+    try {
+      final response = await http.post(
+        Uri.parse("${Config.baseUrl}/users/update-shop-location"),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({
+          "UserId": userId,
+          "Latitude": lat,
+          "Longitude": lng,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      }
+      return {"Error": response.body};
+    } catch (e) {
+      return {"Error": e.toString()};
+    }
+  }
+
+  // ✅ GET CURRENT SHOP LOCATION
+  static Future<Map<String, dynamic>?> getShopLocation(int userId) async {
+    try {
+      final response = await http.get(
+        Uri.parse("${Config.baseUrl}/users/shop-location/$userId"),
+      );
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      }
+      return null;
+    } catch (e) {
+      return null;
+    }
+  }
 }

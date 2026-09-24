@@ -127,8 +127,10 @@ class _DressDetailsScreenState extends State<DressDetailsScreen> {
                           buildInfoRow("Condition:", "${dress!.condition}/10"),
                           buildInfoRow("Dress Age:", dress!.ageDisplay),
                           buildInfoRow(
-                            "Category:",
-                            "${dress!.category} (${dress!.subCategory})",
+                            "Sizes:",
+                            dress!.sizeStocks
+                                .map((s) => "${s.sizeName} (${s.stock})")
+                                .join(", "),
                           ),
 
                           const SizedBox(height: 15),
@@ -319,6 +321,13 @@ class _DressDetailsScreenState extends State<DressDetailsScreen> {
                                         dressId: dress!.id,
                                         rentPerDay: dress!.rentPrice,
                                         dressTitle: dress!.title,
+                                        sizeStocks: dress!.sizeStocks
+                                            .map((s) => {
+                                                  'SizeId': s.sizeId,
+                                                  'SizeName': s.sizeName,
+                                                  'Stock': s.stock,
+                                                })
+                                            .toList(),
                                       ),
                                     ),
                                   );

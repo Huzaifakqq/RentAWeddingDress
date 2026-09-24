@@ -10,55 +10,116 @@ namespace RentAWeddingDressAPI.Controllers
     {
         RentAWeddingDressEntities2 db = new RentAWeddingDressEntities2();
 
-        // ✅ 1. GET CUSTOMER RENTALS
+        // ✅ 1. GET CUSTOMER RENTALS (one row per booking, multi-size combined)
         [HttpGet]
         [Route("user/{userId}")]
         public IHttpActionResult GetMyRentals(int userId)
         {
-            var rentals = db.BookingRequests
+            var raw = db.BookingRequests
                 .Where(b => b.U_id == userId)
                 .OrderByDescending(b => b.BR_id)
-                .SelectMany(b => b.BookingDetails.Select(d => new MyRentalDTO
+                .Select(b => new
                 {
-                    BookingId = b.BR_id,
-                    DressId = d.D_id,
-                    DressTitle = d.Dress.Dtitle,
-                    Image = d.Dress.DressImages
-                                .Select(i => i.ImgPath)
-                                .FirstOrDefault(),
-                    StartDate = b.StartingDate,
-                    EndDate = b.ReturnDate,
-                    TotalPrice = d.TotalPrice,
-                    Status = b.Status ?? 0,
-                    Rating = d.Rating
-                }))
+                    b.BR_id,
+                    b.StartingDate,
+                    b.ReturnDate,
+                    b.Status,
+                    Det = b.BookingDetails.Select(d => new
+                    {
+                        d.D_id,
+                        Title = d.Dress.Dtitle,
+                        Image = d.Dress.DressImages
+                                    .Select(i => i.ImgPath)
+                                    .FirstOrDefault(),
+                        d.TotalPrice,
+                        d.Rating,
+                        d.Quantity,
+                        d.Size_id
+                    })
+                })
+                .AsEnumerable()
+                .Select(x => new
+                {
+                    x.BR_id,
+                    x.StartingDate,
+                    x.ReturnDate,
+                    x.Status,
+                    Det = x.Det.ToList()
+                })
                 .ToList();
+
+            var rentals = raw.Select(x => new MyRentalDTO
+            {
+                BookingId = x.BR_id,
+                DressId = x.Det.Select(d => d.D_id).FirstOrDefault(),
+                DressTitle = x.Det.Select(d => d.Title).FirstOrDefault(),
+                Image = x.Det.Select(d => d.Image).FirstOrDefault(),
+                StartDate = x.StartingDate,
+                EndDate = x.ReturnDate,
+                TotalPrice = x.Det.Sum(d => d.TotalPrice),
+                Status = x.Status ?? 0,
+                Rating = x.Det.Select(d => d.Rating).FirstOrDefault(r => r != null),
+                SizeSummary = string.Join(", ", x.Det.Select(d =>
+                {
+                    string name = d.Size_id == null
+                        ? "?"
+                        : db.Sizes.Where(s => s.Size_id == d.Size_id)
+                                  .Select(s => s.SizeName).FirstOrDefault();
+                    return name + " x " + (d.Quantity ?? 1);
+                }))
+            }).ToList();
 
             return Ok(rentals);
         }
 
-        // ✅ 2. GET OWNER BOOKINGS
+        // ✅ 2. GET OWNER BOOKINGS (one row per booking on owner's dresses)
         [HttpGet]
         [Route("owner/{ownerId}")]
         public IHttpActionResult GetOwnerBookings(int ownerId)
         {
-            var bookings = db.BookingDetails
+            var raw = db.BookingDetails
                 .Where(d => d.Dress.U_id == ownerId)
-                .OrderByDescending(d => d.BR_id)
-                .Select(d => new MyRentalDTO
+                .Select(d => new
                 {
-                    BookingId = d.BR_id,
-                    DressId = d.D_id,
-                    DressTitle = d.Dress.Dtitle,
+                    d.BR_id,
+                    d.D_id,
+                    Title = d.Dress.Dtitle,
                     Image = d.Dress.DressImages
                                 .Select(i => i.ImgPath)
                                 .FirstOrDefault(),
-                    StartDate = d.BookingRequest.StartingDate,
-                    EndDate = d.BookingRequest.ReturnDate,
-                    TotalPrice = d.TotalPrice,
-                    Status = d.BookingRequest.Status ?? 0,
-                    Rating = d.Rating
+                    d.TotalPrice,
+                    d.Rating,
+                    d.Quantity,
+                    d.Size_id,
+                    d.BookingRequest.StartingDate,
+                    d.BookingRequest.ReturnDate,
+                    d.BookingRequest.Status
                 })
+                .ToList();
+
+            var bookings = raw
+                .GroupBy(x => x.BR_id)
+                .Select(g => new MyRentalDTO
+                {
+                    BookingId = g.Key,
+                    DressId = g.Select(x => x.D_id).FirstOrDefault(),
+                    DressTitle = g.Select(x => x.Title).FirstOrDefault(),
+                    Image = g.Select(x => x.Image).FirstOrDefault(),
+                    StartDate = g.Select(x => x.StartingDate).FirstOrDefault(),
+                    EndDate = g.Select(x => x.ReturnDate).FirstOrDefault(),
+                    TotalPrice = g.Sum(x => x.TotalPrice),
+                    Status = g.Select(x => x.Status).FirstOrDefault() ?? 0,
+                    Rating = g.Select(x => x.Rating).FirstOrDefault(r => r != null),
+                    SizeSummary = string.Join(", ", g.Select(x =>
+                    {
+                        string name = x.Size_id == null
+                            ? "?"
+                            : db.Sizes.Where(s => s.Size_id == x.Size_id)
+                                      .Select(s => s.SizeName).FirstOrDefault();
+                        return name + " x " + (x.Quantity ?? 1);
+                    }))
+                })
+                .OrderByDescending(x => x.BookingId)
                 .ToList();
 
             return Ok(bookings);
@@ -84,7 +145,8 @@ namespace RentAWeddingDressAPI.Controllers
             switch (currentStatus)
             {
                 case 0: // Pending
-                    if (newStatus == 1 || newStatus == 2 || newStatus == 3)
+                    // Cancel goes through /bookings/cancel (penalty logic)
+                    if (newStatus == 1 || newStatus == 3)
                         isValid = true;
                     break;
 

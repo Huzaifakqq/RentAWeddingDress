@@ -13,6 +13,7 @@ namespace RentAWeddingDressAPI.DTOs
         public decimal TotalPrice { get; set; }
         public int Status { get; set; }
         public int? Rating { get; set; }
+        public string SizeSummary { get; set; }
     }
 
     public class UpdateStatusDTO

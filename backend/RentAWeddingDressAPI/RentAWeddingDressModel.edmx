@@ -4,7 +4,7 @@
   <edmx:Runtime>
     <!-- SSDL content -->
     <edmx:StorageModels>
-      <Schema Namespace="RentAWeddingDressModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2008" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+    <Schema Namespace="RentAWeddingDressModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2008" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
         <EntityType Name="BookingDetail">
           <Key>
             <PropertyRef Name="BD_id" />
@@ -15,6 +15,8 @@
           <Property Name="TotalPrice" Type="decimal" Precision="18" Scale="2" Nullable="false" />
           <Property Name="Feedback" Type="nvarchar(max)" />
           <Property Name="Rating" Type="int" />
+          <Property Name="Quantity" Type="int" />
+          <Property Name="Size_id" Type="int" />
         </EntityType>
         <EntityType Name="BookingRequest">
           <Key>
@@ -27,6 +29,8 @@
           <Property Name="NoOfDays" Type="int" Nullable="false" />
           <Property Name="ReturnDate" Type="datetime" Nullable="false" />
           <Property Name="Status" Type="int" />
+          <Property Name="CancelledDate" Type="datetime" />
+          <Property Name="PenaltyAmount" Type="decimal" Precision="10" Scale="2" />
         </EntityType>
         <EntityType Name="Dress">
           <Key>
@@ -44,6 +48,8 @@
           <Property Name="AgeMonths" Type="int" />
           <Property Name="AgeDays" Type="int" />
           <Property Name="Condition" Type="int" />
+          <Property Name="Latitude" Type="decimal" Precision="9" Scale="6" />
+          <Property Name="Longitude" Type="decimal" Precision="9" Scale="6" />
         </EntityType>
         <EntityType Name="DressCategory">
           <Key>
@@ -75,6 +81,7 @@
           <Property Name="DS_id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
           <Property Name="D_id" Type="int" Nullable="false" />
           <Property Name="Size_id" Type="int" Nullable="false" />
+          <Property Name="Stock" Type="int" />
         </EntityType>
         <EntityType Name="Sizes">
           <Key>
@@ -107,6 +114,7 @@
           <Property Name="Name" Type="nvarchar" MaxLength="100" Nullable="false" />
           <Property Name="Contact" Type="nvarchar" MaxLength="50" Nullable="false" />
           <Property Name="Password" Type="nvarchar" MaxLength="255" Nullable="false" />
+          <Property Name="CreditBalance" Type="decimal" Precision="10" Scale="2" />
         </EntityType>
         <Association Name="FK__BookingDe__BR_id__73BA3083">
           <End Role="BookingRequest" Type="Self.BookingRequest" Multiplicity="1">
@@ -337,8 +345,7 @@
             <End Role="UserAddress" EntitySet="UserAddress" />
           </AssociationSet>
         </EntityContainer>
-      </Schema>
-    </edmx:StorageModels>
+      </Schema></edmx:StorageModels>
     <!-- CSDL content -->
     <edmx:ConceptualModels>
       <Schema Namespace="RentAWeddingDressModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
@@ -354,6 +361,8 @@
           <Property Name="Rating" Type="Int32" />
           <NavigationProperty Name="BookingRequest" Relationship="Self.FK__BookingDe__BR_id__73BA3083" FromRole="BookingDetail" ToRole="BookingRequest" />
           <NavigationProperty Name="Dress" Relationship="Self.FK__BookingDet__D_id__74AE54BC" FromRole="BookingDetail" ToRole="Dress" />
+          <Property Name="Quantity" Type="Int32" />
+          <Property Name="Size_id" Type="Int32" />
         </EntityType>
         <EntityType Name="BookingRequest">
           <Key>
@@ -369,6 +378,8 @@
           <NavigationProperty Name="BookingDetails" Relationship="Self.FK__BookingDe__BR_id__73BA3083" FromRole="BookingRequest" ToRole="BookingDetail" />
           <NavigationProperty Name="UserAddress" Relationship="Self.FK__BookingRe__UserA__76969D2E" FromRole="BookingRequest" ToRole="UserAddress" />
           <NavigationProperty Name="User" Relationship="Self.FK__BookingReq__U_id__75A278F5" FromRole="BookingRequest" ToRole="Users" />
+          <Property Name="CancelledDate" Type="DateTime" Precision="3" />
+          <Property Name="PenaltyAmount" Type="Decimal" Precision="10" Scale="2" />
         </EntityType>
         <EntityType Name="Dress">
           <Key>
@@ -393,6 +404,8 @@
           <NavigationProperty Name="DressImages" Relationship="Self.FK__DressImage__D_id__7A672E12" FromRole="Dress" ToRole="DressImages" />
           <NavigationProperty Name="DressOccasions" Relationship="Self.FK__DressOccas__D_id__7B5B524B" FromRole="Dress" ToRole="DressOccasion" />
           <NavigationProperty Name="DressSizes" Relationship="Self.FK__DressSizes__D_id__7C4F7684" FromRole="Dress" ToRole="DressSizes" />
+          <Property Name="Latitude" Type="Decimal" Precision="9" Scale="6" />
+          <Property Name="Longitude" Type="Decimal" Precision="9" Scale="6" />
         </EntityType>
         <EntityType Name="DressCategory">
           <Key>
@@ -430,6 +443,7 @@
           <Property Name="Size_id" Type="Int32" Nullable="false" />
           <NavigationProperty Name="Dress" Relationship="Self.FK__DressSizes__D_id__7C4F7684" FromRole="DressSizes" ToRole="Dress" />
           <NavigationProperty Name="Size" Relationship="Self.FK__DressSize__Size___7D439ABD" FromRole="DressSizes" ToRole="Sizes" />
+          <Property Name="Stock" Type="Int32" />
         </EntityType>
         <EntityType Name="Size">
           <Key>
@@ -470,6 +484,7 @@
           <NavigationProperty Name="BookingRequests" Relationship="Self.FK__BookingReq__U_id__75A278F5" FromRole="Users" ToRole="BookingRequest" />
           <NavigationProperty Name="Dresses" Relationship="Self.FK__Dress__U_id__778AC167" FromRole="Users" ToRole="Dress" />
           <NavigationProperty Name="UserAddresses" Relationship="Self.FK__UserAddres__U_id__7F2BE32F" FromRole="Users" ToRole="UserAddress" />
+          <Property Name="CreditBalance" Type="Decimal" Precision="10" Scale="2" />
         </EntityType>
         <Association Name="FK__BookingDe__BR_id__73BA3083">
           <End Role="BookingRequest" Type="Self.BookingRequest" Multiplicity="1">
@@ -709,6 +724,8 @@
           <EntitySetMapping Name="BookingDetails">
             <EntityTypeMapping TypeName="RentAWeddingDressModel.BookingDetail">
               <MappingFragment StoreEntitySet="BookingDetail">
+                <ScalarProperty Name="Size_id" ColumnName="Size_id" />
+                <ScalarProperty Name="Quantity" ColumnName="Quantity" />
                 <ScalarProperty Name="BD_id" ColumnName="BD_id" />
                 <ScalarProperty Name="BR_id" ColumnName="BR_id" />
                 <ScalarProperty Name="D_id" ColumnName="D_id" />
@@ -721,6 +738,8 @@
           <EntitySetMapping Name="BookingRequests">
             <EntityTypeMapping TypeName="RentAWeddingDressModel.BookingRequest">
               <MappingFragment StoreEntitySet="BookingRequest">
+                <ScalarProperty Name="PenaltyAmount" ColumnName="PenaltyAmount" />
+                <ScalarProperty Name="CancelledDate" ColumnName="CancelledDate" />
                 <ScalarProperty Name="BR_id" ColumnName="BR_id" />
                 <ScalarProperty Name="U_id" ColumnName="U_id" />
                 <ScalarProperty Name="UserAddressID" ColumnName="UserAddressID" />
@@ -734,6 +753,8 @@
           <EntitySetMapping Name="Dresses">
             <EntityTypeMapping TypeName="RentAWeddingDressModel.Dress">
               <MappingFragment StoreEntitySet="Dress">
+                <ScalarProperty Name="Longitude" ColumnName="Longitude" />
+                <ScalarProperty Name="Latitude" ColumnName="Latitude" />
                 <ScalarProperty Name="D_id" ColumnName="D_id" />
                 <ScalarProperty Name="U_id" ColumnName="U_id" />
                 <ScalarProperty Name="Category_id" ColumnName="Category_id" />
@@ -778,6 +799,7 @@
           <EntitySetMapping Name="DressSizes">
             <EntityTypeMapping TypeName="RentAWeddingDressModel.DressSize">
               <MappingFragment StoreEntitySet="DressSizes">
+                <ScalarProperty Name="Stock" ColumnName="Stock" />
                 <ScalarProperty Name="DS_id" ColumnName="DS_id" />
                 <ScalarProperty Name="D_id" ColumnName="D_id" />
                 <ScalarProperty Name="Size_id" ColumnName="Size_id" />
@@ -813,6 +835,7 @@
           <EntitySetMapping Name="Users">
             <EntityTypeMapping TypeName="RentAWeddingDressModel.User">
               <MappingFragment StoreEntitySet="Users">
+                <ScalarProperty Name="CreditBalance" ColumnName="CreditBalance" />
                 <ScalarProperty Name="U_id" ColumnName="U_id" />
                 <ScalarProperty Name="Name" ColumnName="Name" />
                 <ScalarProperty Name="Contact" ColumnName="Contact" />

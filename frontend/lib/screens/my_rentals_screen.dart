@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:rent_a_wedding_dress/screens/review_screen.dart';
 import '../models/user_session.dart';
 import '../services/rental_service.dart';
+import '../services/booking_service.dart';
 import '../config.dart';
 
 class MyRentalsScreen extends StatefulWidget {
@@ -47,6 +48,159 @@ class _MyRentalsScreenState extends State<MyRentalsScreen> {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text("Invalid action")));
+    }
+  }
+
+  // ✅ CANCEL BOOKING — anytime; penalty within 3 days shown as Rs. 0
+  Future<void> cancelBooking(dynamic booking) async {
+    int bookingId = booking["BookingId"];
+    DateTime startDate = DateTime.parse(booking["StartDate"]);
+    int daysBefore = startDate.difference(DateTime.now()).inDays;
+
+    bool hasPenalty = daysBefore < 3;
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text("Cancel Booking?"),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text("Days until delivery: $daysBefore"),
+            const SizedBox(height: 10),
+            if (hasPenalty)
+              const Text(
+                "Penalty: Rs. 0\n(late cancellation — waived for now)",
+                style: TextStyle(
+                  color: Colors.red,
+                  fontWeight: FontWeight.bold,
+                ),
+              )
+            else
+              const Text(
+                "Free cancellation (3+ days before delivery)",
+                style: TextStyle(color: Colors.green),
+              ),
+            const SizedBox(height: 10),
+            const Text(
+              "You can cancel or reschedule anytime.",
+              style: TextStyle(fontSize: 13, color: Colors.black54),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text("Keep Booking"),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            onPressed: () async {
+              Navigator.pop(ctx);
+              final result = await BookingService.cancelBooking(
+                UserSession.userId!,
+                bookingId,
+              );
+              if (result != null) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(result["Message"] ?? "Cancelled")),
+                );
+                await loadRentals();
+              }
+            },
+            child: const Text(
+              "Cancel Booking",
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ✅ RESCHEDULE BOOKING — anytime; penalty within 3 days shown as Rs. 0
+  Future<void> rescheduleBooking(dynamic booking) async {
+    int bookingId = booking["BookingId"];
+    DateTime currentStart = DateTime.parse(booking["StartDate"]);
+    DateTime currentEnd = DateTime.parse(booking["EndDate"]);
+    int daysBefore = currentStart.difference(DateTime.now()).inDays;
+    bool hasPenalty = daysBefore < 3;
+
+    final newRange = await showDateRangePicker(
+      context: context,
+      firstDate: DateTime.now(),
+      lastDate: DateTime(2030),
+      initialDateRange: DateTimeRange(start: currentStart, end: currentEnd),
+    );
+
+    if (newRange == null || !mounted) return;
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text("Reschedule Booking?"),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "New dates: ${newRange.start.toLocal().toString().split(' ')[0]} "
+              "- ${newRange.end.toLocal().toString().split(' ')[0]}",
+            ),
+            const SizedBox(height: 10),
+            Text("Days until current delivery: $daysBefore"),
+            const SizedBox(height: 10),
+            if (hasPenalty)
+              const Text(
+                "Penalty: Rs. 0\n(late reschedule — waived for now)",
+                style: TextStyle(
+                  color: Colors.red,
+                  fontWeight: FontWeight.bold,
+                ),
+              )
+            else
+              const Text(
+                "No penalty (3+ days before delivery)",
+                style: TextStyle(color: Colors.green),
+              ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text("Back"),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.black),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text(
+              "Confirm Reschedule",
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && mounted) {
+      final result = await BookingService.rescheduleBooking(
+        UserSession.userId!,
+        bookingId,
+        newRange.start.toIso8601String(),
+        newRange.end.toIso8601String(),
+      );
+
+      if (result != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(result["Message"] ?? "Rescheduled")),
+        );
+        await loadRentals();
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Reschedule failed")),
+        );
+      }
     }
   }
 
@@ -100,6 +254,8 @@ class _MyRentalsScreenState extends State<MyRentalsScreen> {
     DateTime endDate = DateTime.parse(booking["EndDate"]);
     DateTime today = DateTime.now();
 
+    String? sizeSummary = booking["SizeSummary"];
+
     return Card(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
       margin: const EdgeInsets.symmetric(vertical: 8),
@@ -134,6 +290,16 @@ class _MyRentalsScreenState extends State<MyRentalsScreen> {
                         "${booking["StartDate"].split("T")[0]} to ${booking["EndDate"].split("T")[0]}",
                         style: const TextStyle(color: Colors.black54),
                       ),
+                      if (sizeSummary != null && sizeSummary.isNotEmpty) ...[
+                        const SizedBox(height: 4),
+                        Text(
+                          sizeSummary,
+                          style: const TextStyle(
+                            color: Colors.black54,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
                       const SizedBox(height: 5),
                       Text(
                         "Rs.${booking["TotalPrice"]}",
@@ -188,10 +354,15 @@ class _MyRentalsScreenState extends State<MyRentalsScreen> {
     int bookingId = booking["BookingId"];
 
     if (!isOwner) {
-      // ✅ CUSTOMER VIEW
+      // ✅ CUSTOMER VIEW — cancel/reschedule anytime (status 0 and 1)
       switch (status) {
         case 0:
-          buttons.add(actionButton("Cancel", () => updateStatus(bookingId, 2)));
+        case 1:
+          buttons.add(actionButton("Cancel", () => cancelBooking(booking)));
+          buttons.add(const SizedBox(width: 10));
+          buttons.add(
+            actionButton("Reschedule", () => rescheduleBooking(booking)),
+          );
           break;
 
         case 4:

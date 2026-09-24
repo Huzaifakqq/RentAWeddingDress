@@ -33,6 +33,8 @@ namespace RentAWeddingDressAPI.DTOs
 
         public List<int> SizeIds { get; set; }
 
+        public Dictionary<int, int> SizeStock { get; set; }
+
         public List<string> ImagePaths { get; set; }
     }
 }

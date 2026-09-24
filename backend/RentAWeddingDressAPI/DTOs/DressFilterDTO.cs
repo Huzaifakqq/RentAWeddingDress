@@ -27,5 +27,18 @@ namespace RentAWeddingDressAPI.DTOs
         public int? FromAgeMonths { get; set; }
         public int? ToAgeYears { get; set; }
         public int? ToAgeMonths { get; set; }
+
+        // ✅ LOCATION FILTER
+        public double? UserLat { get; set; }
+        public double? UserLng { get; set; }
+        public double? MaxKm { get; set; }
+    }
+
+    // ✅ Shop owner sets location once for all dresses
+    public class ShopLocationDTO
+    {
+        public int UserId { get; set; }
+        public double Latitude { get; set; }
+        public double Longitude { get; set; }
     }
 }

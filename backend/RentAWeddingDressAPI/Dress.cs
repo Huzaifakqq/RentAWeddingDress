@@ -34,6 +34,8 @@ namespace RentAWeddingDressAPI
         public Nullable<int> AgeMonths { get; set; }
         public Nullable<int> AgeDays { get; set; }
         public Nullable<int> Condition { get; set; }
+        public Nullable<decimal> Latitude { get; set; }
+        public Nullable<decimal> Longitude { get; set; }
     
         public virtual ICollection<BookingDetail> BookingDetails { get; set; }
         public virtual DressCategory DressCategory { get; set; }
