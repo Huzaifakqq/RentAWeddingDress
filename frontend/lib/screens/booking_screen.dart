@@ -82,8 +82,19 @@ class _BookingScreenState extends State<BookingScreen> {
       addresses = result;
       if (addresses.isNotEmpty) {
         selectedAddressId = addresses.first["UA_id"];
+        _applyAddressPin(addresses.first);
       }
     });
+  }
+
+  // ✅ Put a saved address's map pin onto the screen (if it has one)
+  void _applyAddressPin(dynamic address) {
+    final lat = (address["Latitude"] as num?)?.toDouble();
+    final lng = (address["Longitude"] as num?)?.toDouble();
+    if (lat != null && lng != null) {
+      deliveryLat = lat;
+      deliveryLng = lng;
+    }
   }
 
   // ✅ Pick Date
@@ -193,6 +204,11 @@ class _BookingScreenState extends State<BookingScreen> {
       "StartDate": selectedDateRange!.start.toIso8601String(),
       "EndDate": selectedDateRange!.end.toIso8601String(),
       "Items": selectedItems,
+      // ✅ Delivery pin from Google Maps → saved on UserAddress
+      if (deliveryLat != null && deliveryLng != null) ...{
+        "Latitude": deliveryLat,
+        "Longitude": deliveryLng,
+      },
     });
 
     setState(() => isConfirming = false);
@@ -317,6 +333,11 @@ class _BookingScreenState extends State<BookingScreen> {
                         final success = await DressService.addAddress({
                           "U_id": UserSession.userId,
                           "Address": controller.text,
+                          // ✅ Map pin (may be null if user skipped the map)
+                          if (lat != null && lng != null) ...{
+                            "Latitude": lat,
+                            "Longitude": lng,
+                          },
                         });
 
                         if (success) {
@@ -631,6 +652,11 @@ class _BookingScreenState extends State<BookingScreen> {
                       onChanged: (value) {
                         setState(() {
                           selectedAddressId = value;
+                          final addr = addresses.firstWhere(
+                            (a) => a["UA_id"] == value,
+                            orElse: () => null,
+                          );
+                          if (addr != null) _applyAddressPin(addr);
                         });
                       },
                       decoration: InputDecoration(
