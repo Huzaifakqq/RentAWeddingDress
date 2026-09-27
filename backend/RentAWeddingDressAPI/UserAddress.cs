@@ -22,6 +22,8 @@ namespace RentAWeddingDressAPI
         public int UA_id { get; set; }
         public int U_id { get; set; }
         public string Address { get; set; }
+        public Nullable<decimal> Latitude { get; set; }
+        public Nullable<decimal> Longitude { get; set; }
     
         public virtual ICollection<BookingRequest> BookingRequests { get; set; }
         public virtual User User { get; set; }

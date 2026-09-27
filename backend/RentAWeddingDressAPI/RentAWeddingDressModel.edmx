@@ -105,6 +105,8 @@
           <Property Name="UA_id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
           <Property Name="U_id" Type="int" Nullable="false" />
           <Property Name="Address" Type="nvarchar(max)" Nullable="false" />
+          <Property Name="Latitude" Type="decimal" Precision="9" Scale="6" />
+          <Property Name="Longitude" Type="decimal" Precision="9" Scale="6" />
         </EntityType>
         <EntityType Name="Users">
           <Key>
@@ -470,6 +472,8 @@
           <Property Name="UA_id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
           <Property Name="U_id" Type="Int32" Nullable="false" />
           <Property Name="Address" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Latitude" Type="Decimal" Precision="9" Scale="6" />
+          <Property Name="Longitude" Type="Decimal" Precision="9" Scale="6" />
           <NavigationProperty Name="BookingRequests" Relationship="Self.FK__BookingRe__UserA__76969D2E" FromRole="UserAddress" ToRole="BookingRequest" />
           <NavigationProperty Name="User" Relationship="Self.FK__UserAddres__U_id__7F2BE32F" FromRole="UserAddress" ToRole="Users" />
         </EntityType>
@@ -829,6 +833,8 @@
                 <ScalarProperty Name="UA_id" ColumnName="UA_id" />
                 <ScalarProperty Name="U_id" ColumnName="U_id" />
                 <ScalarProperty Name="Address" ColumnName="Address" />
+                <ScalarProperty Name="Latitude" ColumnName="Latitude" />
+                <ScalarProperty Name="Longitude" ColumnName="Longitude" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>

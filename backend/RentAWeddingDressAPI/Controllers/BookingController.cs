@@ -157,6 +157,17 @@ namespace RentAWeddingDressAPI.Controllers
             if (customer == null)
                 return BadRequest("User not found.");
 
+            // ✅ Save delivery pin (from Google Maps) onto the chosen address
+            var userAddress = db.UserAddresses.Find(model.UserAddressId);
+            if (userAddress == null || userAddress.U_id != model.UserId)
+                return BadRequest("Address not found.");
+
+            if (model.Latitude.HasValue && model.Longitude.HasValue)
+            {
+                userAddress.Latitude = (decimal)model.Latitude.Value;
+                userAddress.Longitude = (decimal)model.Longitude.Value;
+            }
+
             decimal creditBalance = customer.CreditBalance ?? 0;
             decimal creditPenalty = 0;
             decimal finalTotal = orderTotal;
