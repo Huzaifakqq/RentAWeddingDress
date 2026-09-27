@@ -40,6 +40,10 @@ namespace RentAWeddingDressAPI.DTOs
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
         public List<BookingItemDTO> Items { get; set; }
+
+        // ✅ Delivery pin from Google Maps (optional; stored on UserAddress)
+        public double? Latitude { get; set; }
+        public double? Longitude { get; set; }
     }
 
     // ✅ Cancel Booking Request

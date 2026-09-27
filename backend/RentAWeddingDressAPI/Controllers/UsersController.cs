@@ -23,7 +23,7 @@ namespace RentAWeddingDressAPI.Controllers
             return Ok("Address added successfully");
         }
 
-        // ✅ GET USER ADDRESSES
+        // ✅ GET USER ADDRESSES (includes map pin)
         [HttpGet]
         [Route("{userId}/addresses")]
         public IHttpActionResult GetUserAddresses(int userId)
@@ -33,7 +33,9 @@ namespace RentAWeddingDressAPI.Controllers
                 .Select(a => new
                 {
                     a.UA_id,
-                    a.Address
+                    a.Address,
+                    Latitude = (double?)a.Latitude,
+                    Longitude = (double?)a.Longitude
                 })
                 .ToList();
 
