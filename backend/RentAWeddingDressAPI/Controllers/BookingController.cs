@@ -387,5 +387,38 @@ namespace RentAWeddingDressAPI.Controllers
                 CreditBalance = user.CreditBalance ?? 0
             });
         }
+
+        // ✅ GET BOOKED DATE RANGES FOR A DRESS (blocks calendar days)
+        // excludeBookingId: skip this booking's own dates (e.g. when rescheduling it)
+        [HttpGet]
+        [Route("booked-dates/{dressId}")]
+        public IHttpActionResult GetBookedDates(int dressId, int? excludeBookingId = null)
+        {
+            var query = db.BookingDetails
+                .Where(bd => bd.D_id == dressId &&
+                             bd.BookingRequest.Status != 2 &&
+                             bd.BookingRequest.Status != 3)
+                .Select(bd => new
+                {
+                    bd.BookingRequest.BR_id,
+                    Start = bd.BookingRequest.StartingDate,
+                    End = bd.BookingRequest.ReturnDate
+                });
+
+            if (excludeBookingId.HasValue)
+                query = query.Where(x => x.BR_id != excludeBookingId.Value);
+
+            var ranges = query
+                .ToList()
+                .GroupBy(x => new { x.Start, x.End })
+                .Select(g => new
+                {
+                    Start = g.Key.Start.ToString("yyyy-MM-dd"),
+                    End = g.Key.End.ToString("yyyy-MM-dd")
+                })
+                .ToList();
+
+            return Ok(ranges);
+        }
     }
 }

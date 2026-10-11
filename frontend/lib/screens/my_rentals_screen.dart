@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:rent_a_wedding_dress/screens/review_screen.dart';
+import 'package:table_calendar/table_calendar.dart';
 import '../models/user_session.dart';
 import '../services/rental_service.dart';
 import '../services/booking_service.dart';
@@ -119,19 +120,38 @@ class _MyRentalsScreenState extends State<MyRentalsScreen> {
     );
   }
 
-  // ✅ RESCHEDULE BOOKING — anytime; penalty within 3 days shown as Rs. 0
+  // ✅ RESCHEDULE BOOKING — booked days are greyed out & unselectable
   Future<void> rescheduleBooking(dynamic booking) async {
     int bookingId = booking["BookingId"];
+    int dressId = booking["DressId"];
     DateTime currentStart = DateTime.parse(booking["StartDate"]);
     DateTime currentEnd = DateTime.parse(booking["EndDate"]);
     int daysBefore = currentStart.difference(DateTime.now()).inDays;
     bool hasPenalty = daysBefore < 3;
 
-    final newRange = await showDateRangePicker(
-      context: context,
-      firstDate: DateTime.now(),
-      lastDate: DateTime(2030),
-      initialDateRange: DateTimeRange(start: currentStart, end: currentEnd),
+    // ✅ Load other bookings' dates for this dress (exclude this booking)
+    final bookedRaw = await BookingService.getBookedDates(
+      dressId,
+      excludeBookingId: bookingId,
+    );
+
+    // Build a set of blocked calendar days (start..end inclusive)
+    final blocked = <DateTime>{};
+    for (final r in bookedRaw) {
+      final s = DateTime.parse(r["Start"] as String);
+      final e = DateTime.parse(r["End"] as String);
+      for (var d = DateTime(s.year, s.month, s.day);
+          !d.isAfter(DateTime(e.year, e.month, e.day));
+          d = d.add(const Duration(days: 1))) {
+        blocked.add(d);
+      }
+    }
+
+    final newRange = await _pickRangeWithBlockedDays(
+      currentStart: currentStart,
+      currentEnd: currentEnd,
+      blocked: blocked,
+      hasBlockedDates: bookedRaw.isNotEmpty,
     );
 
     if (newRange == null || !mounted) return;
@@ -202,6 +222,216 @@ class _MyRentalsScreenState extends State<MyRentalsScreen> {
         );
       }
     }
+  }
+
+  // ✅ Calendar dialog: booked days greyed out & unselectable
+  Future<DateTimeRange?> _pickRangeWithBlockedDays({
+    required DateTime currentStart,
+    required DateTime currentEnd,
+    required Set<DateTime> blocked,
+    required bool hasBlockedDates,
+  }) {
+    DateTime? start = DateTime(currentStart.year, currentStart.month, currentStart.day);
+    DateTime? end = DateTime(currentEnd.year, currentEnd.month, currentEnd.day);
+    DateTime focused = start;
+
+    bool isBlocked(DateTime day) {
+      final d = DateTime(day.year, day.month, day.day);
+      return blocked.contains(d);
+    }
+
+    // A range is invalid if ANY day inside it is blocked
+    bool rangeHitsBlocked(DateTime s, DateTime e) {
+      for (var d = DateTime(s.year, s.month, s.day);
+          !d.isAfter(DateTime(e.year, e.month, e.day));
+          d = d.add(const Duration(days: 1))) {
+        if (blocked.contains(d)) return true;
+      }
+      return false;
+    }
+
+    return showDialog<DateTimeRange>(
+      context: context,
+      builder: (ctx) {
+        String? errorText;
+
+        return StatefulBuilder(
+          builder: (ctx, setDialogState) {
+            return AlertDialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              title: const Text(
+                "Select New Dates",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+              ),
+              content: SingleChildScrollView(
+                child: SizedBox(
+                  width: 330,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // ✅ Legend
+                      Row(
+                        children: [
+                          Container(
+                            width: 14,
+                            height: 14,
+                            decoration: BoxDecoration(
+                              color: Colors.red.shade100,
+                              borderRadius: BorderRadius.circular(3),
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          const Text(
+                            "Booked — not available",
+                            style: TextStyle(fontSize: 12),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+
+                      TableCalendar(
+                        firstDay: DateTime.now(),
+                        lastDay: DateTime(2030),
+                        focusedDay: focused.isBefore(DateTime.now())
+                            ? DateTime.now()
+                            : focused,
+                        currentDay: DateTime.now(),
+                        rangeStartDay: start,
+                        rangeEndDay: end,
+                        enabledDayPredicate: (day) => !isBlocked(day),
+                        onDaySelected: (selectedDay, focusedDay) {
+                          setDialogState(() {
+                            focused = focusedDay;
+                            final d = DateTime(
+                              selectedDay.year,
+                              selectedDay.month,
+                              selectedDay.day,
+                            );
+
+                            if (isBlocked(d)) {
+                              errorText = "This date is already booked.";
+                              return;
+                            }
+
+                            if (start == null || end != null) {
+                              // begin new range
+                              start = d;
+                              end = null;
+                              errorText = null;
+                            } else if (d.isBefore(start!)) {
+                              start = d;
+                              end = null;
+                              errorText = null;
+                            } else if (rangeHitsBlocked(start!, d)) {
+                              errorText =
+                                  "Range includes booked dates. Pick different dates.";
+                            } else {
+                              end = d;
+                              errorText = null;
+                            }
+                          });
+                        },
+                        onRangeSelected: (s, e, f) {
+                          setDialogState(() {
+                            focused = f;
+                            start = s;
+                            end = e;
+                          });
+                        },
+                        calendarStyle: CalendarStyle(
+                          outsideDaysVisible: false,
+                          rangeHighlightColor: Colors.black12,
+                          todayDecoration: BoxDecoration(
+                            color: Colors.grey.shade300,
+                            shape: BoxShape.circle,
+                          ),
+                          defaultDecoration: BoxDecoration(
+                            color: Colors.white,
+                            shape: BoxShape.circle,
+                          ),
+                          disabledDecoration: BoxDecoration(
+                            color: Colors.red.shade100,
+                            shape: BoxShape.circle,
+                          ),
+                          disabledTextStyle: TextStyle(
+                            color: Colors.red.shade400,
+                          ),
+                        ),
+                        headerStyle: const HeaderStyle(
+                          titleCentered: true,
+                          formatButtonVisible: false,
+                          titleTextStyle: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+
+                      if (errorText != null) ...[
+                        const SizedBox(height: 8),
+                        Text(
+                          errorText!,
+                          style: const TextStyle(
+                            color: Colors.red,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ],
+
+                      if (hasBlockedDates) ...[
+                        const SizedBox(height: 6),
+                        const Text(
+                          "Grey dates are already booked for this dress.",
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.black54,
+                          ),
+                        ),
+                      ],
+
+                      if (start != null && end != null) ...[
+                        const SizedBox(height: 10),
+                        Text(
+                          "${start!.toLocal().toString().split(' ')[0]} → "
+                          "${end!.toLocal().toString().split(' ')[0]}",
+                          style: const TextStyle(fontWeight: FontWeight.w600),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(ctx, null),
+                  child: const Text("Cancel"),
+                ),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.black,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                  ),
+                  onPressed: (start != null && end != null)
+                      ? () => Navigator.pop(
+                            ctx,
+                            DateTimeRange(start: start!, end: end!),
+                          )
+                      : null,
+                  child: const Text(
+                    "Select",
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
   }
 
   Color getStatusColor(int status) {

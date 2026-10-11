@@ -279,6 +279,12 @@ namespace RentAWeddingDressAPI.Controllers
             if (string.IsNullOrEmpty(model.Dtitle))
                 return BadRequest("Title is required.");
 
+            // ✅ Auto-copy shop location from any existing dress of this owner
+            var existingWithLocation = db.Dresses
+                .Where(d => d.U_id == model.UserId &&
+                            d.Latitude != null && d.Longitude != null)
+                .FirstOrDefault();
+
             var dress = new Dress
             {
                 U_id = model.UserId,
@@ -291,7 +297,10 @@ namespace RentAWeddingDressAPI.Controllers
                 AgeMonths = model.AgeMonths,
                 AgeDays = model.AgeDays,
                 RentPrice = model.RentPrice,
-                Description = model.Description
+                Description = model.Description,
+                // Inherit shop pin so Near Me works for new uploads
+                Latitude = existingWithLocation?.Latitude,
+                Longitude = existingWithLocation?.Longitude
             };
 
             db.Dresses.Add(dress);

@@ -126,4 +126,28 @@ class BookingService {
     }
     return 0;
   }
+
+  // ✅ GET BOOKED DATE RANGES for a dress → [ {"Start":"yyyy-MM-dd","End":"..."} ]
+  // excludeBookingId: ignore this booking's own dates (used when rescheduling it)
+  static Future<List<dynamic>> getBookedDates(
+    int dressId, {
+    int? excludeBookingId,
+  }) async {
+    try {
+      var uri = Uri.parse("${Config.baseUrl}/bookings/booked-dates/$dressId");
+      if (excludeBookingId != null) {
+        uri = uri.replace(queryParameters: {"excludeBookingId": "$excludeBookingId"});
+      }
+
+      final response = await http.get(uri);
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      }
+      print("Booked Dates Error ${response.statusCode}: ${response.body}");
+      return [];
+    } catch (e) {
+      print("Booked Dates Exception: $e");
+      return [];
+    }
+  }
 }
