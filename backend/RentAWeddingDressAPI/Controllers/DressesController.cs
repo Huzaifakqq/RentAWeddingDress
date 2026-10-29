@@ -19,6 +19,9 @@ namespace RentAWeddingDressAPI.Controllers
         [Route("filter")]
         public IHttpActionResult FilterDresses(DressFilterDTO filter)
         {
+            if (filter == null)
+                filter = new DressFilterDTO();
+
             var query = db.Dresses.AsQueryable();
 
             // ✅ 1. Search by Title

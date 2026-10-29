@@ -23,6 +23,8 @@ class _UploadDressScreenState extends State<UploadDressScreen> {
   List categories = [];
   List subCategories = [];
   List sizes = [];
+  bool isLoadingData = true;
+  String loadError = "";
 
   int? selectedCategoryId;
   int? selectedSubCategoryId;
@@ -49,7 +51,12 @@ class _UploadDressScreenState extends State<UploadDressScreen> {
   Future<void> loadInitialData() async {
     categories = await DressService.getCategories();
     sizes = await DressService.getSizes();
-    setState(() {});
+    print("Categories loaded: ${categories.length}");
+    print("Sizes loaded: ${sizes.length}");
+    if (categories.isEmpty) {
+      loadError = "Failed to load categories. Check API connection.";
+    }
+    setState(() => isLoadingData = false);
   }
 
   Future<void> loadSubCategories(int categoryId) async {
@@ -286,25 +293,45 @@ class _UploadDressScreenState extends State<UploadDressScreen> {
               style: TextStyle(fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 5),
-            DropdownButtonFormField<int>(
-              items: categories.map<DropdownMenuItem<int>>((c) {
-                return DropdownMenuItem<int>(
-                  value: c['Category_id'],
-                  child: Text(c['Cname']),
-                );
-              }).toList(),
-              onChanged: (value) {
-                setState(() {
-                  selectedCategoryId = value;
-
-                  // ✅ Reset immediately
-                  selectedSubCategoryId = null;
-                  subCategories = []; // clear old list
-                });
-
-                loadSubCategories(value!);
-              },
-            ),
+            if (isLoadingData)
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 12),
+                child: Center(child: CircularProgressIndicator()),
+              )
+            else if (categories.isEmpty)
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.red.shade50,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  loadError.isEmpty
+                      ? "No categories found"
+                      : loadError,
+                  style: const TextStyle(color: Colors.red),
+                ),
+              )
+            else
+              DropdownButtonFormField<int>(
+                isExpanded: true,
+                value: selectedCategoryId,
+                hint: const Text("Select Category"),
+                items: categories.map<DropdownMenuItem<int>>((c) {
+                  return DropdownMenuItem<int>(
+                    value: c['Category_id'] as int,
+                    child: Text(c['Cname'].toString()),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    selectedCategoryId = value;
+                    selectedSubCategoryId = null;
+                    subCategories = [];
+                  });
+                  loadSubCategories(value!);
+                },
+              ),
 
             const SizedBox(height: 25),
 
@@ -314,25 +341,40 @@ class _UploadDressScreenState extends State<UploadDressScreen> {
               style: TextStyle(fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 5),
-            DropdownButtonFormField<int>(
-              value:
-                  subCategories.any(
-                    (s) => s['SubCategory_id'] == selectedSubCategoryId,
-                  )
-                  ? selectedSubCategoryId
-                  : null,
-              items: subCategories.map<DropdownMenuItem<int>>((s) {
-                return DropdownMenuItem<int>(
-                  value: s['SubCategory_id'],
-                  child: Text(s['SCname']),
-                );
-              }).toList(),
-              onChanged: (value) {
-                setState(() {
-                  selectedSubCategoryId = value;
-                });
-              },
-            ),
+            if (selectedCategoryId == null)
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade100,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Text(
+                  "Select category first",
+                  style: TextStyle(color: Colors.grey),
+                ),
+              )
+            else if (subCategories.isEmpty)
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 12),
+                child: Center(child: CircularProgressIndicator()),
+              )
+            else
+              DropdownButtonFormField<int>(
+                isExpanded: true,
+                value: selectedSubCategoryId,
+                hint: const Text("Select Sub Category"),
+                items: subCategories.map<DropdownMenuItem<int>>((s) {
+                  return DropdownMenuItem<int>(
+                    value: s['SubCategory_id'] as int,
+                    child: Text(s['SCname'].toString()),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    selectedSubCategoryId = value;
+                  });
+                },
+              ),
             const SizedBox(height: 25),
 
             // ✅ CONDITION
