@@ -293,7 +293,41 @@ class _DressesScreenState extends State<DressesScreen> {
             ),
           ),
 
-          const SizedBox(height: 8),
+          const SizedBox(height: 6),
+
+          // ✅ Per-copy details so customers can tell copies apart
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: Row(
+              children: [
+                if (dress.ageDisplay.isNotEmpty) ...[
+                  const Icon(Icons.history, size: 13, color: Colors.grey),
+                  const SizedBox(width: 3),
+                  Flexible(
+                    child: Text(
+                      dress.ageDisplay,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(fontSize: 11, color: Colors.grey),
+                    ),
+                  ),
+                ],
+                if (dress.ageDisplay.isNotEmpty && dress.condition > 0)
+                  const SizedBox(width: 8),
+                if (dress.condition > 0)
+                  Text(
+                    "Cond ${dress.condition}/10",
+                    style: const TextStyle(
+                      fontSize: 11,
+                      color: Colors.grey,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 6),
 
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8),

@@ -14,5 +14,9 @@ namespace RentAWeddingDressAPI.DTOs
         public string Image { get; set; }
         public string Occasion { get; set; }
         public double Rating { get; set; }
+
+        // ✅ Per-copy identification (age + condition) on browse cards
+        public int Condition { get; set; }
+        public string AgeDisplay { get; set; }
     }
 }

@@ -142,19 +142,36 @@ namespace RentAWeddingDressAPI.Controllers
                     d.Longitude >= minLng && d.Longitude <= maxLng);
             }
 
-            // ✅ Final Result
-            var result = query.Select(d => new DressListDTO
+            // ✅ Final Result (materialize first — FormatAge can't translate to SQL)
+            var raw = query.Select(d => new
             {
-                D_id = d.D_id,
+                d.D_id,
                 Title = d.Dtitle,
-                RentPrice = d.RentPrice,
-                Gender = d.Gender,
+                d.RentPrice,
+                d.Gender,
                 Image = d.DressImages.Select(i => i.ImgPath).FirstOrDefault(),
                 Occasion = d.DressOccasions.Select(o => o.Occasion).FirstOrDefault(),
                 Rating = d.BookingDetails
                             .Where(b => b.Rating != null)
                             .Select(b => (double?)b.Rating)
-                            .Average() ?? 0
+                            .Average() ?? 0,
+                d.Condition,
+                d.AgeYears,
+                d.AgeMonths,
+                d.AgeDays
+            }).ToList();
+
+            var result = raw.Select(r => new DressListDTO
+            {
+                D_id = r.D_id,
+                Title = r.Title,
+                RentPrice = r.RentPrice,
+                Gender = r.Gender,
+                Image = r.Image,
+                Occasion = r.Occasion,
+                Rating = r.Rating,
+                Condition = r.Condition ?? 0,
+                AgeDisplay = FormatAge(r.AgeYears, r.AgeMonths, r.AgeDays)
             }).ToList();
 
             return Ok(result);
@@ -288,6 +305,69 @@ namespace RentAWeddingDressAPI.Controllers
                             d.Latitude != null && d.Longitude != null)
                 .FirstOrDefault();
 
+            // ✅ MULTI-COPY UPLOAD: one separate listing (Dress row) per physical copy,
+            //    each with its own size, age and condition → shown individually on browse
+            if (model.Copies != null && model.Copies.Count > 0)
+            {
+                var createdIds = new System.Collections.Generic.List<int>();
+
+                foreach (var copy in model.Copies)
+                {
+                    var copyDress = new Dress
+                    {
+                        U_id = model.UserId,
+                        Dtitle = model.Dtitle,
+                        Category_id = model.CategoryId,
+                        SubCategory_id = model.SubCategoryId,
+                        Gender = model.Gender,
+                        Condition = copy.Condition,
+                        AgeYears = copy.AgeYears,
+                        AgeMonths = copy.AgeMonths,
+                        AgeDays = copy.AgeDays,
+                        RentPrice = model.RentPrice,
+                        Description = model.Description,
+                        Latitude = existingWithLocation?.Latitude,
+                        Longitude = existingWithLocation?.Longitude
+                    };
+
+                    db.Dresses.Add(copyDress);
+                    db.SaveChanges(); // get D_id for child rows
+
+                    // Same images for every copy (shared photo set)
+                    if (model.ImagePaths != null)
+                    {
+                        foreach (var img in model.ImagePaths)
+                            db.DressImages.Add(new DressImage { D_id = copyDress.D_id, ImgPath = img });
+                    }
+
+                    // Same occasions for every copy
+                    if (model.Occasions != null)
+                    {
+                        foreach (var occasion in model.Occasions)
+                            db.DressOccasions.Add(new DressOccasion { D_id = copyDress.D_id, Occasion = occasion });
+                    }
+
+                    // One physical copy = one size, stock 1
+                    db.DressSizes.Add(new DressSize
+                    {
+                        D_id = copyDress.D_id,
+                        Size_id = copy.SizeId,
+                        Stock = 1
+                    });
+
+                    db.SaveChanges();
+                    createdIds.Add(copyDress.D_id);
+                }
+
+                return Ok(new
+                {
+                    Message = model.Copies.Count + " copies uploaded successfully",
+                    DressId = createdIds[0],
+                    DressIds = createdIds
+                });
+            }
+
+            // ✅ SINGLE COPY (legacy path): one listing, sizes with stock
             var dress = new Dress
             {
                 U_id = model.UserId,

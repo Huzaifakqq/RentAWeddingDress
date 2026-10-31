@@ -36,5 +36,17 @@ namespace RentAWeddingDressAPI.DTOs
         public Dictionary<int, int> SizeStock { get; set; }
 
         public List<string> ImagePaths { get; set; }
+
+        // ✅ Per-copy details: one entry per physical copy (age + condition each)
+        public List<DressCopyDTO> Copies { get; set; }
+    }
+
+    public class DressCopyDTO
+    {
+        public int SizeId { get; set; }
+        public int AgeYears { get; set; }
+        public int AgeMonths { get; set; }
+        public int AgeDays { get; set; }
+        public int Condition { get; set; }
     }
 }

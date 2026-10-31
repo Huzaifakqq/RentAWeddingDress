@@ -7,6 +7,10 @@ class DressModel {
   final String? occasion;
   final double rating;
 
+  // ✅ Per-copy identification (each copy listed separately)
+  final int condition;
+  final String ageDisplay;
+
   DressModel({
     required this.id,
     required this.title,
@@ -15,6 +19,8 @@ class DressModel {
     required this.image,
     required this.occasion,
     required this.rating,
+    this.condition = 0,
+    this.ageDisplay = "",
   });
 
   factory DressModel.fromJson(Map<String, dynamic> json) {
@@ -26,6 +32,8 @@ class DressModel {
       image: json['Image'],
       occasion: json['Occasion'],
       rating: (json['Rating'] ?? 0).toDouble(),
+      condition: json['Condition'] ?? 0,
+      ageDisplay: json['AgeDisplay'] ?? '',
     );
   }
 }

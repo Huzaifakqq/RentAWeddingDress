@@ -40,6 +40,10 @@ class _UploadDressScreenState extends State<UploadDressScreen> {
   List<int> selectedSizeIds = [];
   Map<int, int> sizeStock = {};
 
+  // ✅ Multi-copy upload: each copy gets its own size / age / condition
+  int copiesCount = 1;
+  final List<CopyEntry> copyEntries = [CopyEntry()];
+
   final List<String> occasionOptions = ["Mehndi", "Barat", "Walima", "Nikkah"];
 
   @override
@@ -105,29 +109,62 @@ class _UploadDressScreenState extends State<UploadDressScreen> {
       return;
     }
 
+    // ✅ Validate per-copy details when uploading multiple copies
+    if (copiesCount > 1) {
+      for (int i = 0; i < copyEntries.length; i++) {
+        if (copyEntries[i].sizeId == null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("Select size for Copy ${i + 1}")),
+          );
+          return;
+        }
+      }
+    }
+
     await uploadImages();
 
-    final success = await DressService.createDress({
+    final data = <String, dynamic>{
       "UserId": UserSession.userId,
       "Dtitle": titleController.text,
       "CategoryId": selectedCategoryId,
       "SubCategoryId": selectedSubCategoryId,
       "Gender": selectedGender,
       "Condition": conditionValue.toInt(),
-      "AgeYears": int.parse(yearsController.text),
-      "AgeMonths": int.parse(monthsController.text),
-      "AgeDays": int.parse(daysController.text),
+      "AgeYears": int.tryParse(yearsController.text) ?? 0,
+      "AgeMonths": int.tryParse(monthsController.text) ?? 0,
+      "AgeDays": int.tryParse(daysController.text) ?? 0,
       "RentPrice": double.parse(priceController.text),
       "Description": descriptionController.text,
       "Occasions": selectedOccasions,
       "SizeIds": selectedSizeIds,
       "SizeStock": sizeStock.map((k, v) => MapEntry(k.toString(), v)),
       "ImagePaths": uploadedImagePaths,
-    });
+    };
+
+    // ✅ Multi-copy: one separate listing per copy, each with own age/condition
+    if (copiesCount > 1) {
+      data["Copies"] = copyEntries.take(copiesCount).map((c) {
+        return {
+          "SizeId": c.sizeId,
+          "AgeYears": int.tryParse(c.years.text) ?? 0,
+          "AgeMonths": int.tryParse(c.months.text) ?? 0,
+          "AgeDays": int.tryParse(c.days.text) ?? 0,
+          "Condition": c.condition.toInt(),
+        };
+      }).toList();
+    }
+
+    final success = await DressService.createDress(data);
 
     if (success) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Dress Uploaded Successfully")),
+        SnackBar(
+          content: Text(
+            copiesCount > 1
+                ? "$copiesCount copies uploaded successfully"
+                : "Dress Uploaded Successfully",
+          ),
+        ),
       );
 
       Navigator.push(
@@ -377,147 +414,217 @@ class _UploadDressScreenState extends State<UploadDressScreen> {
               ),
             const SizedBox(height: 25),
 
-            // ✅ CONDITION
+            // ✅ NUMBER OF COPIES
             const Text(
-              "Condition",
+              "Number of Copies",
               style: TextStyle(fontWeight: FontWeight.w600),
             ),
-            Slider(
-              min: 1,
-              max: 10,
-              divisions: 9,
-              activeColor: Colors.black,
-              value: conditionValue,
-              label: conditionValue.toInt().toString(),
-              onChanged: (val) {
-                setState(() {
-                  conditionValue = val;
-                });
-              },
-            ),
-
-            const SizedBox(height: 25),
-
-            // ✅ DRESS AGE
+            const SizedBox(height: 5),
             const Text(
-              "Dress Age",
-              style: TextStyle(fontWeight: FontWeight.w600),
+              "If you have multiple physical copies, set age & condition "
+              "of each copy separately — every copy becomes its own listing.",
+              style: TextStyle(fontSize: 12, color: Colors.grey),
             ),
             const SizedBox(height: 10),
-
             Row(
               children: [
-                Expanded(
-                  child: TextField(
-                    controller: yearsController,
-                    keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(
-                      labelText: "Years",
-                      hintText: "0",
+                IconButton(
+                  onPressed: copiesCount > 1
+                      ? () => setCopiesCount(copiesCount - 1)
+                      : null,
+                  icon: const Icon(Icons.remove_circle_outline),
+                ),
+                Container(
+                  width: 60,
+                  alignment: Alignment.center,
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.black),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    "$copiesCount",
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
                     ),
                   ),
                 ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: TextField(
-                    controller: monthsController,
-                    keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(
-                      labelText: "Months",
-                      hintText: "0",
-                    ),
-                  ),
+                IconButton(
+                  onPressed: copiesCount < 50
+                      ? () => setCopiesCount(copiesCount + 1)
+                      : null,
+                  icon: const Icon(Icons.add_circle_outline),
                 ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: TextField(
-                    controller: daysController,
-                    keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(
-                      labelText: "Days",
-                      hintText: "0",
-                    ),
-                  ),
+                const SizedBox(width: 8),
+                const Text(
+                  "copy/copies",
+                  style: TextStyle(color: Colors.grey),
                 ),
               ],
             ),
 
             const SizedBox(height: 25),
 
-            // ✅ SIZES
-            const Text(
-              "Available Sizes",
-              style: TextStyle(fontWeight: FontWeight.w600),
-            ),
-            const SizedBox(height: 10),
-
-            Wrap(
-              spacing: 10,
-              children: sizes.map((s) {
-                final id = s['Size_id'];
-                final selected = selectedSizeIds.contains(id);
-                return ChoiceChip(
-                  label: Text(s['SizeName']),
-                  selected: selected,
-                  selectedColor: Colors.black,
-                  backgroundColor: Colors.white,
-                  labelStyle: TextStyle(
-                    color: selected ? Colors.white : Colors.black,
+            if (copiesCount > 1)
+              // ✅ PER-COPY DETAILS: separate size / age / condition for each copy
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    "Details for Each Copy",
+                    style: TextStyle(fontWeight: FontWeight.w600),
                   ),
-                  side: const BorderSide(color: Colors.black),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
+                  const SizedBox(height: 10),
+                  ...List.generate(
+                    copiesCount,
+                    (index) => buildCopyCard(index),
                   ),
-                  onSelected: (val) {
-                    setState(() {
-                      selected
-                          ? selectedSizeIds.remove(id)
-                          : selectedSizeIds.add(id);
-                      if (!selected) sizeStock[id] = 1;
-                    });
-                  },
-                );
-              }).toList(),
-            ),
-
-            // ✅ STOCK INPUTS FOR EACH SELECTED SIZE
-            if (selectedSizeIds.isNotEmpty) ...[
-              const SizedBox(height: 15),
+                ],
+              )
+            else ...[
+              // ✅ CONDITION (single-copy mode)
               const Text(
-                "Stock per Size",
+                "Condition",
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
+              Slider(
+                min: 1,
+                max: 10,
+                divisions: 9,
+                activeColor: Colors.black,
+                value: conditionValue,
+                label: conditionValue.toInt().toString(),
+                onChanged: (val) {
+                  setState(() {
+                    conditionValue = val;
+                  });
+                },
+              ),
+
+              const SizedBox(height: 25),
+
+              // ✅ DRESS AGE (single-copy mode)
+              const Text(
+                "Dress Age",
                 style: TextStyle(fontWeight: FontWeight.w600),
               ),
               const SizedBox(height: 10),
-              ...selectedSizeIds.map((sizeId) {
-                final sizeName = sizes
-                    .firstWhere((s) => s['Size_id'] == sizeId)['SizeName'];
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 10),
-                  child: Row(
-                    children: [
-                      SizedBox(
-                        width: 80,
-                        child: Text(sizeName),
+
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: yearsController,
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(
+                        labelText: "Years",
+                        hintText: "0",
                       ),
-                      SizedBox(
-                        width: 80,
-                        child: TextField(
-                          keyboardType: TextInputType.number,
-                          decoration: const InputDecoration(
-                            labelText: "Qty",
-                          ),
-                          controller: TextEditingController(
-                            text: (sizeStock[sizeId] ?? 1).toString(),
-                          ),
-                          onChanged: (val) {
-                            sizeStock[sizeId] = int.tryParse(val) ?? 1;
-                          },
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
-                );
-              }),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: TextField(
+                      controller: monthsController,
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(
+                        labelText: "Months",
+                        hintText: "0",
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: TextField(
+                      controller: daysController,
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(
+                        labelText: "Days",
+                        hintText: "0",
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 25),
+
+              // ✅ SIZES
+              const Text(
+                "Available Sizes",
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
+              const SizedBox(height: 10),
+
+              Wrap(
+                spacing: 10,
+                children: sizes.map((s) {
+                  final id = s['Size_id'];
+                  final selected = selectedSizeIds.contains(id);
+                  return ChoiceChip(
+                    label: Text(s['SizeName']),
+                    selected: selected,
+                    selectedColor: Colors.black,
+                    backgroundColor: Colors.white,
+                    labelStyle: TextStyle(
+                      color: selected ? Colors.white : Colors.black,
+                    ),
+                    side: const BorderSide(color: Colors.black),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    onSelected: (val) {
+                      setState(() {
+                        selected
+                            ? selectedSizeIds.remove(id)
+                            : selectedSizeIds.add(id);
+                        if (!selected) sizeStock[id] = 1;
+                      });
+                    },
+                  );
+                }).toList(),
+              ),
+
+              // ✅ STOCK INPUTS FOR EACH SELECTED SIZE
+              if (selectedSizeIds.isNotEmpty) ...[
+                const SizedBox(height: 15),
+                const Text(
+                  "Stock per Size",
+                  style: TextStyle(fontWeight: FontWeight.w600),
+                ),
+                const SizedBox(height: 10),
+                ...selectedSizeIds.map((sizeId) {
+                  final sizeName = sizes
+                      .firstWhere((s) => s['Size_id'] == sizeId)['SizeName'];
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 10),
+                    child: Row(
+                      children: [
+                        SizedBox(
+                          width: 80,
+                          child: Text(sizeName),
+                        ),
+                        SizedBox(
+                          width: 80,
+                          child: TextField(
+                            keyboardType: TextInputType.number,
+                            decoration: const InputDecoration(
+                              labelText: "Qty",
+                            ),
+                            controller: TextEditingController(
+                              text: (sizeStock[sizeId] ?? 1).toString(),
+                            ),
+                            onChanged: (val) {
+                              sizeStock[sizeId] = int.tryParse(val) ?? 1;
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }),
+              ],
             ],
 
             const SizedBox(height: 25),
@@ -604,4 +711,127 @@ class _UploadDressScreenState extends State<UploadDressScreen> {
       ),
     );
   }
+
+  // ✅ Resize per-copy entries to match the chosen copies count
+  void setCopiesCount(int count) {
+    if (count < 1) count = 1;
+    if (count > 50) count = 50;
+    setState(() {
+      copiesCount = count;
+      while (copyEntries.length < count) {
+        copyEntries.add(CopyEntry());
+      }
+    });
+  }
+
+  // ✅ One card per physical copy: its own size, age and condition
+  Widget buildCopyCard(int index) {
+    final entry = copyEntries[index];
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 15),
+      padding: const EdgeInsets.all(15),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border.all(color: Colors.grey.shade400),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            "Copy ${index + 1}",
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+          ),
+          const SizedBox(height: 12),
+
+          // Size
+          DropdownButtonFormField<int>(
+            isExpanded: true,
+            value: entry.sizeId,
+            hint: const Text("Select Size"),
+            items: sizes.map<DropdownMenuItem<int>>((s) {
+              return DropdownMenuItem<int>(
+                value: s['Size_id'] as int,
+                child: Text(s['SizeName'].toString()),
+              );
+            }).toList(),
+            onChanged: (value) {
+              setState(() {
+                entry.sizeId = value;
+              });
+            },
+          ),
+          const SizedBox(height: 12),
+
+          // Age
+          Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: entry.years,
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(labelText: "Years"),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: TextField(
+                  controller: entry.months,
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(labelText: "Months"),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: TextField(
+                  controller: entry.days,
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(labelText: "Days"),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+
+          // Condition
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                "Condition",
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
+              Text(
+                "${entry.condition.toInt()}/10",
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+          Slider(
+            min: 1,
+            max: 10,
+            divisions: 9,
+            activeColor: Colors.black,
+            value: entry.condition,
+            label: entry.condition.toInt().toString(),
+            onChanged: (val) {
+              setState(() {
+                entry.condition = val;
+              });
+            },
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ✅ Holds one physical copy's details on the upload screen
+class CopyEntry {
+  final TextEditingController years = TextEditingController(text: "0");
+  final TextEditingController months = TextEditingController(text: "0");
+  final TextEditingController days = TextEditingController(text: "0");
+  double condition = 5;
+  int? sizeId;
 }
