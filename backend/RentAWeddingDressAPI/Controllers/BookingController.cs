@@ -11,10 +11,11 @@ namespace RentAWeddingDressAPI.Controllers
     [RoutePrefix("api/bookings")]
     public class BookingController : ApiController
     {
-        // Supervisor: show penalty but charge Rs. 0 for now.
-        // Later change PenaltyRate to 0.5m for real 50% penalty.
-        private const decimal PenaltyRate = 0m;
-        private const int PenaltyThresholdDays = 3;
+        // Supervisor credit system: cancel OR reschedule within the last
+        // 4 days before delivery → 20% of the booking total is deducted
+        // from the customer's credit balance (Users.CreditBalance).
+        private const decimal PenaltyRate = 0.20m;
+        private const int PenaltyThresholdDays = 4;
 
         RentAWeddingDressEntities2 db = new RentAWeddingDressEntities2();
 
@@ -244,9 +245,9 @@ namespace RentAWeddingDressAPI.Controllers
             int daysBeforeDelivery = (booking.StartingDate - DateTime.Now).Days;
             decimal orderTotal = booking.BookingDetails.Sum(d => d.TotalPrice);
 
-            // Shown in UI if within 3 days; currently charged Rs. 0.
+            // 20% of booking total when delivery is 4 days away or less.
             decimal penalty = 0;
-            bool hasPenalty = daysBeforeDelivery < PenaltyThresholdDays;
+            bool hasPenalty = daysBeforeDelivery <= PenaltyThresholdDays;
 
             if (hasPenalty)
             {
@@ -269,8 +270,10 @@ namespace RentAWeddingDressAPI.Controllers
 
             return Ok(new
             {
-                Message = hasPenalty
-                    ? "Booking cancelled. Late-cancellation penalty applied."
+                Message = hasPenalty && penalty > 0
+                    ? "Booking cancelled. Rs."
+                      + penalty.ToString("0")
+                      + " late-cancellation charge (20%) deducted from credit."
                     : "Booking cancelled.",
                 Penalty = penalty,
                 HasPenalty = hasPenalty,
@@ -302,7 +305,11 @@ namespace RentAWeddingDressAPI.Controllers
                 return BadRequest("Cannot reschedule at this stage.");
 
             int daysBeforeDelivery = (booking.StartingDate - DateTime.Now).Days;
-            bool hasPenalty = daysBeforeDelivery < PenaltyThresholdDays;
+            bool hasPenalty = daysBeforeDelivery <= PenaltyThresholdDays;
+
+            // ✅ Original booking total — the 20% charge is based on this,
+            //    not on the new dates the user is switching to.
+            decimal originalTotal = booking.BookingDetails.Sum(d => d.TotalPrice);
 
             int newNoOfDays = (model.EndDate - model.StartDate).Days + 1;
 
@@ -347,10 +354,9 @@ namespace RentAWeddingDressAPI.Controllers
                 item.TotalPrice = rentPerDay * newNoOfDays * qty;
             }
 
-            decimal orderTotal = booking.BookingDetails.Sum(d => d.TotalPrice);
-            decimal penalty = hasPenalty ? orderTotal * PenaltyRate : 0;
+            decimal penalty = hasPenalty ? originalTotal * PenaltyRate : 0;
 
-            if (hasPenalty && penalty > 0)
+            if (penalty > 0)
             {
                 var user = db.Users.Find(model.UserId);
                 user.CreditBalance = (user.CreditBalance ?? 0) - penalty;
@@ -366,7 +372,11 @@ namespace RentAWeddingDressAPI.Controllers
 
             return Ok(new
             {
-                Message = "Booking rescheduled.",
+                Message = penalty > 0
+                    ? "Booking rescheduled. Rs."
+                      + penalty.ToString("0")
+                      + " late-reschedule charge (20%) deducted from credit."
+                    : "Booking rescheduled.",
                 Penalty = penalty,
                 HasPenalty = hasPenalty,
                 DaysBefore = daysBeforeDelivery

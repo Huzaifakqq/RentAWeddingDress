@@ -4,6 +4,7 @@ import 'package:rent_a_wedding_dress/models/user_session.dart';
 import 'package:rent_a_wedding_dress/screens/login_screen.dart';
 import 'package:rent_a_wedding_dress/screens/my_rentals_screen.dart';
 import 'package:rent_a_wedding_dress/screens/upload_dress_screen.dart';
+import 'package:rent_a_wedding_dress/services/booking_service.dart';
 import 'package:rent_a_wedding_dress/services/dress_service.dart';
 import 'dresses_screen.dart';
 
@@ -16,6 +17,32 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   bool isSettingLocation = false;
+
+  // ✅ CREDIT BALANCE (shown in header card)
+  double? creditBalance;
+  bool isLoadingCredit = true;
+
+  @override
+  void initState() {
+    super.initState();
+    loadCredit();
+  }
+
+  Future<void> loadCredit() async {
+    if (UserSession.userId == null) {
+      if (mounted) setState(() => isLoadingCredit = false);
+      return;
+    }
+
+    final balance = await BookingService.getCredit(UserSession.userId!);
+
+    if (mounted) {
+      setState(() {
+        creditBalance = balance;
+        isLoadingCredit = false;
+      });
+    }
+  }
 
   // ✅ One button sets shop location for ALL dresses of this owner
   Future<void> setShopLocation() async {
@@ -110,6 +137,85 @@ class _HomeScreenState extends State<HomeScreen> {
                   ],
                 ),
               ),
+
+              // ✅ CREDIT BALANCE
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(15),
+                    border: Border.all(color: Colors.grey.shade300),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.account_balance_wallet,
+                        color: (creditBalance ?? 0) < 0
+                            ? Colors.red
+                            : Colors.black,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              "Credit Balance",
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            isLoadingCredit
+                                ? const SizedBox(
+                                    width: 12,
+                                    height: 12,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                    ),
+                                  )
+                                : Text(
+                                    "Rs.${(creditBalance ?? 0).toStringAsFixed(0)}",
+                                    style: TextStyle(
+                                      fontSize: 17,
+                                      fontWeight: FontWeight.bold,
+                                      color: (creditBalance ?? 0) < 0
+                                          ? Colors.red
+                                          : Colors.black,
+                                    ),
+                                  ),
+                          ],
+                        ),
+                      ),
+                      if (!isLoadingCredit && (creditBalance ?? 0) < 0)
+                        const Flexible(
+                          child: Text(
+                            "Due — added to your next booking",
+                            textAlign: TextAlign.right,
+                            style: TextStyle(fontSize: 11, color: Colors.red),
+                          ),
+                        )
+                      else
+                        const Flexible(
+                          child: Text(
+                            "Top-up managed by admin",
+                            textAlign: TextAlign.right,
+                            style: TextStyle(fontSize: 11, color: Colors.grey),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 12),
 
               // ✅ SHOP LOCATION — one tap updates all dresses
               Padding(

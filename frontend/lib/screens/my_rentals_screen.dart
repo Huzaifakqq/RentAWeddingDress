@@ -52,13 +52,15 @@ class _MyRentalsScreenState extends State<MyRentalsScreen> {
     }
   }
 
-  // ✅ CANCEL BOOKING — anytime; penalty within 3 days shown as Rs. 0
+  // ✅ CANCEL BOOKING — free 5+ days out; within 4 days → 20% of booking total
   Future<void> cancelBooking(dynamic booking) async {
     int bookingId = booking["BookingId"];
     DateTime startDate = DateTime.parse(booking["StartDate"]);
     int daysBefore = startDate.difference(DateTime.now()).inDays;
+    double total = ((booking["TotalPrice"] ?? 0) as num).toDouble();
 
-    bool hasPenalty = daysBefore < 3;
+    bool hasPenalty = daysBefore <= 4;
+    double penalty = hasPenalty ? total * 0.2 : 0;
 
     showDialog(
       context: context,
@@ -71,16 +73,18 @@ class _MyRentalsScreenState extends State<MyRentalsScreen> {
             Text("Days until delivery: $daysBefore"),
             const SizedBox(height: 10),
             if (hasPenalty)
-              const Text(
-                "Penalty: Rs. 0\n(late cancellation — waived for now)",
-                style: TextStyle(
+              Text(
+                "Penalty: Rs.${penalty.toStringAsFixed(0)}\n"
+                "(20% of booking total — delivery within 4 days)\n"
+                "Deducted from your credit balance",
+                style: const TextStyle(
                   color: Colors.red,
                   fontWeight: FontWeight.bold,
                 ),
               )
             else
               const Text(
-                "Free cancellation (3+ days before delivery)",
+                "Free cancellation (5+ days before delivery)",
                 style: TextStyle(color: Colors.green),
               ),
             const SizedBox(height: 10),
@@ -127,7 +131,9 @@ class _MyRentalsScreenState extends State<MyRentalsScreen> {
     DateTime currentStart = DateTime.parse(booking["StartDate"]);
     DateTime currentEnd = DateTime.parse(booking["EndDate"]);
     int daysBefore = currentStart.difference(DateTime.now()).inDays;
-    bool hasPenalty = daysBefore < 3;
+    bool hasPenalty = daysBefore <= 4;
+    double total = ((booking["TotalPrice"] ?? 0) as num).toDouble();
+    double penalty = hasPenalty ? total * 0.2 : 0;
 
     // ✅ Load other bookings' dates for this dress (exclude this booking)
     final bookedRaw = await BookingService.getBookedDates(
@@ -172,16 +178,18 @@ class _MyRentalsScreenState extends State<MyRentalsScreen> {
             Text("Days until current delivery: $daysBefore"),
             const SizedBox(height: 10),
             if (hasPenalty)
-              const Text(
-                "Penalty: Rs. 0\n(late reschedule — waived for now)",
-                style: TextStyle(
+              Text(
+                "Penalty: Rs.${penalty.toStringAsFixed(0)}\n"
+                "(20% of booking total — delivery within 4 days)\n"
+                "Deducted from your credit balance",
+                style: const TextStyle(
                   color: Colors.red,
                   fontWeight: FontWeight.bold,
                 ),
               )
             else
               const Text(
-                "No penalty (3+ days before delivery)",
+                "No penalty (5+ days before delivery)",
                 style: TextStyle(color: Colors.green),
               ),
           ],
