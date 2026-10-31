@@ -70,7 +70,9 @@ class _UploadDressScreenState extends State<UploadDressScreen> {
 
   Future<void> pickImages() async {
     final picker = ImagePicker();
-    final images = await picker.pickMultiImage();
+    // ✅ imageQuality re-encodes to JPEG — converts HEIC (iPhone) photos and
+    //    shrinks files so uploads + on-screen decoding stay fast
+    final images = await picker.pickMultiImage(imageQuality: 85);
 
     if (images != null && images.isNotEmpty) {
       setState(() {

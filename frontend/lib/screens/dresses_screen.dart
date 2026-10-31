@@ -141,7 +141,7 @@ class _DressesScreenState extends State<DressesScreen> {
                             maxCrossAxisExtent: 220, // width per card
                             mainAxisSpacing: 12,
                             crossAxisSpacing: 12,
-                            childAspectRatio: 0.75, // more relaxed
+                            childAspectRatio: 0.66, // room for age + condition row
                           ),
                       itemBuilder: (context, index) {
                         final dress = dresses[index];
@@ -241,6 +241,16 @@ class _DressesScreenState extends State<DressesScreen> {
                       ? Image.network(
                           "${Config.imageBaseUrl}${dress.image}",
                           fit: BoxFit.cover,
+                          // ✅ Decode small: avoids main-thread jank/ANR while scrolling
+                          cacheWidth: 480,
+                          errorBuilder: (context, error, stackTrace) =>
+                              Container(
+                            color: Colors.grey[300],
+                            child: const Icon(
+                              Icons.image_not_supported_outlined,
+                              color: Colors.grey,
+                            ),
+                          ),
                         )
                       : Container(color: Colors.grey[300]),
                 ),
