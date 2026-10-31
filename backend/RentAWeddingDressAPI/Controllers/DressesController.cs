@@ -324,7 +324,8 @@ namespace RentAWeddingDressAPI.Controllers
                         AgeYears = copy.AgeYears,
                         AgeMonths = copy.AgeMonths,
                         AgeDays = copy.AgeDays,
-                        RentPrice = model.RentPrice,
+                        // ✅ Per-copy price (better-condition copy can cost more)
+                        RentPrice = copy.Price ?? model.RentPrice,
                         Description = model.Description,
                         Latitude = existingWithLocation?.Latitude,
                         Longitude = existingWithLocation?.Longitude

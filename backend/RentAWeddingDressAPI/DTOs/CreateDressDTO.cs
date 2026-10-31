@@ -48,5 +48,8 @@ namespace RentAWeddingDressAPI.DTOs
         public int AgeMonths { get; set; }
         public int AgeDays { get; set; }
         public int Condition { get; set; }
+
+        // ✅ Optional per-copy price — falls back to listing RentPrice when null
+        public decimal? Price { get; set; }
     }
 }

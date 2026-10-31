@@ -150,6 +150,10 @@ class _UploadDressScreenState extends State<UploadDressScreen> {
           "AgeMonths": int.tryParse(c.months.text) ?? 0,
           "AgeDays": int.tryParse(c.days.text) ?? 0,
           "Condition": c.condition.toInt(),
+          // ✅ Empty price field → backend uses the listing price below
+          "Price": c.price.text.trim().isEmpty
+              ? null
+              : double.tryParse(c.price.text.trim()),
         };
       }).toList();
     }
@@ -821,6 +825,17 @@ class _UploadDressScreenState extends State<UploadDressScreen> {
               });
             },
           ),
+          const SizedBox(height: 4),
+
+          // ✅ Optional per-copy price (blank = use listing price below)
+          TextField(
+            controller: entry.price,
+            keyboardType: TextInputType.number,
+            decoration: const InputDecoration(
+              labelText: "Price for this copy (Rs/day)",
+              hintText: "Blank = listing price",
+            ),
+          ),
         ],
       ),
     );
@@ -832,6 +847,7 @@ class CopyEntry {
   final TextEditingController years = TextEditingController(text: "0");
   final TextEditingController months = TextEditingController(text: "0");
   final TextEditingController days = TextEditingController(text: "0");
+  final TextEditingController price = TextEditingController();
   double condition = 5;
   int? sizeId;
 }
