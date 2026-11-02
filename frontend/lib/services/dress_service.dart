@@ -26,6 +26,20 @@ class DressService {
     }
   }
 
+  // ✅ MY LISTINGS — dresses uploaded by the logged-in owner
+  static Future<List<DressModel>> getMyListings(int userId) async {
+    final response = await http.get(
+      Uri.parse("$baseUrl/dresses/user/$userId"),
+    );
+
+    if (response.statusCode == 200) {
+      final List data = jsonDecode(response.body);
+      return data.map((e) => DressModel.fromJson(e)).toList();
+    } else {
+      return [];
+    }
+  }
+
   // ✅ GET CATEGORIES
   static Future<List<dynamic>> getCategories() async {
     final response = await http.get(Uri.parse("$baseUrl/dresses/categories"));

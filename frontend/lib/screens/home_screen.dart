@@ -3,6 +3,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:rent_a_wedding_dress/models/user_session.dart';
 import 'package:rent_a_wedding_dress/screens/login_screen.dart';
 import 'package:rent_a_wedding_dress/screens/my_rentals_screen.dart';
+import 'package:rent_a_wedding_dress/screens/my_listings_screen.dart';
 import 'package:rent_a_wedding_dress/screens/upload_dress_screen.dart';
 import 'package:rent_a_wedding_dress/services/booking_service.dart';
 import 'package:rent_a_wedding_dress/services/dress_service.dart';
@@ -205,7 +206,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       else
                         const Flexible(
                           child: Text(
-                            "Top-up managed by admin",
+                            "",
                             textAlign: TextAlign.right,
                             style: TextStyle(fontSize: 11, color: Colors.grey),
                           ),
@@ -329,6 +330,10 @@ class _HomeScreenState extends State<HomeScreen> {
               icon: Icon(Icons.receipt_long),
               label: "My Rentals",
             ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.inventory_2),
+              label: "My Listings",
+            ),
           ],
           onTap: (index) {
             if (index == 1) {
@@ -345,6 +350,11 @@ class _HomeScreenState extends State<HomeScreen> {
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (_) => const MyRentalsScreen()),
+              );
+            } else if (index == 4) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const MyListingsScreen()),
               );
             }
           },

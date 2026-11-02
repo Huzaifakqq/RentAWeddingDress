@@ -177,6 +177,47 @@ namespace RentAWeddingDressAPI.Controllers
             return Ok(result);
         }
 
+        // ✅ MY LISTINGS — every dress uploaded by the logged-in owner
+        [HttpGet]
+        [Route("user/{userId}")]
+        public IHttpActionResult GetMyListings(int userId)
+        {
+            var raw = db.Dresses
+                .Where(d => d.U_id == userId)
+                .Select(d => new
+                {
+                    d.D_id,
+                    Title = d.Dtitle,
+                    d.RentPrice,
+                    d.Gender,
+                    Image = d.DressImages.Select(i => i.ImgPath).FirstOrDefault(),
+                    Occasion = d.DressOccasions.Select(o => o.Occasion).FirstOrDefault(),
+                    Rating = d.BookingDetails
+                                .Where(b => b.Rating != null)
+                                .Select(b => (double?)b.Rating)
+                                .Average() ?? 0,
+                    d.Condition,
+                    d.AgeYears,
+                    d.AgeMonths,
+                    d.AgeDays
+                }).ToList();
+
+            var result = raw.Select(r => new DressListDTO
+            {
+                D_id = r.D_id,
+                Title = r.Title,
+                RentPrice = r.RentPrice,
+                Gender = r.Gender,
+                Image = r.Image,
+                Occasion = r.Occasion,
+                Rating = r.Rating,
+                Condition = r.Condition ?? 0,
+                AgeDisplay = FormatAge(r.AgeYears, r.AgeMonths, r.AgeDays)
+            }).ToList();
+
+            return Ok(result);
+        }
+
         // ✅ DRESS DETAILS API
         [HttpGet]
         [Route("{id}")]
