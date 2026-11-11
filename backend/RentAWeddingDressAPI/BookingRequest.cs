@@ -28,6 +28,7 @@ namespace RentAWeddingDressAPI
         public Nullable<int> Status { get; set; }
         public Nullable<System.DateTime> CancelledDate { get; set; }
         public Nullable<decimal> PenaltyAmount { get; set; }
+        public Nullable<int> Rider_id { get; set; }
     
         public virtual ICollection<BookingDetail> BookingDetails { get; set; }
         public virtual UserAddress UserAddress { get; set; }

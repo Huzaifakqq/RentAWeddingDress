@@ -17,6 +17,9 @@ namespace RentAWeddingDressAPI.Controllers
         private const decimal PenaltyRate = 0.20m;
         private const int PenaltyThresholdDays = 4;
 
+        // ✅ RIDER: orders become visible to riders this many hours before delivery
+        private const int RiderWindowHours = 5;
+
         RentAWeddingDressEntities2 db = new RentAWeddingDressEntities2();
 
         // ✅ CHECK AVAILABILITY (multi-size)
@@ -429,6 +432,184 @@ namespace RentAWeddingDressAPI.Controllers
                 .ToList();
 
             return Ok(ranges);
+        }
+
+        // ══════════════════════════════════════════════════════════
+        //  ✅ RIDER ENDPOINTS
+        // ══════════════════════════════════════════════════════════
+
+        // Shared projection: booking → rider order card
+        private IQueryable<RiderOrderDTO> ProjectRiderOrders(IQueryable<BookingRequest> query)
+        {
+            return query.Select(b => new RiderOrderDTO
+            {
+                BookingId = b.BR_id,
+                StartDate = b.StartingDate,
+                EndDate = b.ReturnDate,
+                NoOfDays = b.NoOfDays,
+                Status = b.Status,
+                CustomerName = b.User.Name,
+                CustomerContact = b.User.Contact,
+                Address = b.UserAddress.Address,
+                DeliveryLat = b.UserAddress.Latitude,
+                DeliveryLng = b.UserAddress.Longitude,
+                DressTitle = b.BookingDetails.Select(bd => bd.Dress.Dtitle).FirstOrDefault(),
+                DressImage = b.BookingDetails
+                                .Select(bd => bd.Dress.DressImages
+                                    .Select(i => i.ImgPath).FirstOrDefault())
+                                .FirstOrDefault(),
+                ShopLat = b.BookingDetails.Select(bd => bd.Dress.Latitude).FirstOrDefault(),
+                ShopLng = b.BookingDetails.Select(bd => bd.Dress.Longitude).FirstOrDefault(),
+                TotalPrice = b.BookingDetails.Sum(bd => (decimal?)bd.TotalPrice) ?? 0
+            });
+        }
+
+        // ✅ RIDER: nearby orders opening within the rider window
+        // GET api/bookings/rider/available?lat=..&lng=..&radiusKm=25
+        [HttpGet]
+        [Route("rider/available")]
+        public IHttpActionResult RiderAvailable(double lat, double lng, double radiusKm = 25)
+        {
+            var now = DateTime.Now;
+            var cutoff = now.AddHours(RiderWindowHours);
+
+            // Owner-accepted, not picked yet, unassigned, delivery starting soon
+            var raw = ProjectRiderOrders(db.BookingRequests
+                    .Where(b => b.Status == 1 &&
+                                b.Rider_id == null &&
+                                b.StartingDate <= cutoff))
+                .ToList();
+
+            // ✅ Radius check against the DRESS shop lat/lng
+            //    (same bounding-box math as the Near-Me dress filter)
+            double latDelta = radiusKm / 111.0;
+            double lngDelta = radiusKm / (111.0 * Math.Cos(lat * Math.PI / 180.0));
+
+            var result = raw
+                .Where(r => r.ShopLat.HasValue && r.ShopLng.HasValue &&
+                            (double)r.ShopLat.Value >= lat - latDelta &&
+                            (double)r.ShopLat.Value <= lat + latDelta &&
+                            (double)r.ShopLng.Value >= lng - lngDelta &&
+                            (double)r.ShopLng.Value <= lng + lngDelta)
+                .OrderBy(r => r.StartDate)
+                .Select(r =>
+                {
+                    r.HoursUntil = (r.StartDate - now).TotalHours;
+                    return r;
+                })
+                .ToList();
+
+            return Ok(result);
+        }
+
+        // ✅ RIDER: orders assigned to this rider (accepted / picked / delivered)
+        // GET api/bookings/rider/my/{riderId}
+        [HttpGet]
+        [Route("rider/my/{riderId}")]
+        public IHttpActionResult RiderMyDeliveries(int riderId)
+        {
+            var now = DateTime.Now;
+
+            var result = ProjectRiderOrders(db.BookingRequests
+                    .Where(b => b.Rider_id == riderId &&
+                                (b.Status == 1 || b.Status == 4 || b.Status == 5)))
+                .ToList()
+                .OrderBy(r => r.StartDate)
+                .Select(r =>
+                {
+                    r.HoursUntil = (r.StartDate - now).TotalHours;
+                    return r;
+                })
+                .ToList();
+
+            return Ok(result);
+        }
+
+        // ✅ RIDER: accept an available order (assigns it to this rider)
+        // POST api/bookings/rider/accept  { BookingId, RiderId }
+        [HttpPost]
+        [Route("rider/accept")]
+        public IHttpActionResult RiderAccept(RiderActionDTO model)
+        {
+            if (model == null)
+                return BadRequest("Invalid data.");
+
+            var rider = db.Users.Find(model.RiderId);
+            if (rider == null ||
+                (string.IsNullOrWhiteSpace(rider.Role) ? "customer" : rider.Role).ToLower() != "rider")
+                return BadRequest("Only rider accounts can accept deliveries.");
+
+            var booking = db.BookingRequests
+                .FirstOrDefault(b => b.BR_id == model.BookingId);
+
+            if (booking == null)
+                return NotFound();
+
+            if (booking.Status != 1)
+                return BadRequest("Order is no longer available.");
+
+            if (booking.Rider_id != null)
+                return BadRequest("Order was already accepted by another rider.");
+
+            if (booking.StartingDate > DateTime.Now.AddHours(RiderWindowHours))
+                return BadRequest("Delivery is not within the rider window yet.");
+
+            booking.Rider_id = model.RiderId;
+            db.SaveChanges();
+
+            return Ok(new
+            {
+                Message = "Order accepted. It now appears in My Deliveries.",
+                BookingId = booking.BR_id
+            });
+        }
+
+        // ✅ RIDER: advance the delivery status
+        // POST api/bookings/rider/action  { BookingId, RiderId, Action: "picked"|"delivered" }
+        [HttpPost]
+        [Route("rider/action")]
+        public IHttpActionResult RiderAction(RiderActionDTO model)
+        {
+            if (model == null)
+                return BadRequest("Invalid data.");
+
+            var booking = db.BookingRequests
+                .FirstOrDefault(b => b.BR_id == model.BookingId);
+
+            if (booking == null)
+                return NotFound();
+
+            if (booking.Rider_id != model.RiderId)
+                return BadRequest("This order is not assigned to you.");
+
+            string action = (model.Action ?? "").Trim().ToLower();
+
+            if (action == "picked")
+            {
+                if (booking.Status != 1)
+                    return BadRequest("Order must be accepted before pickup.");
+                booking.Status = 4; // Picked from shop
+            }
+            else if (action == "delivered")
+            {
+                if (booking.Status != 4)
+                    return BadRequest("Order must be picked before delivery.");
+                booking.Status = 5; // Delivered / PickupConfirmed
+            }
+            else
+            {
+                return BadRequest("Unknown action.");
+            }
+
+            db.SaveChanges();
+
+            return Ok(new
+            {
+                Message = action == "picked"
+                    ? "Marked as picked from shop."
+                    : "Marked as delivered to customer.",
+                Status = booking.Status
+            });
         }
     }
 }

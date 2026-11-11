@@ -13,5 +13,9 @@ namespace RentAWeddingDressAPI.DTOs
 
         [Required]
         public string Password { get; set; }
+
+        // ✅ Role mode selected on the login screen ("customer" or "rider").
+        //    Null/empty = don't check (backward compatible).
+        public string Role { get; set; }
     }
 }

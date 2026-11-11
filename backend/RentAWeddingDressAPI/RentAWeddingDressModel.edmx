@@ -31,6 +31,7 @@
           <Property Name="Status" Type="int" />
           <Property Name="CancelledDate" Type="datetime" />
           <Property Name="PenaltyAmount" Type="decimal" Precision="10" Scale="2" />
+          <Property Name="Rider_id" Type="int" />
         </EntityType>
         <EntityType Name="Dress">
           <Key>
@@ -117,6 +118,7 @@
           <Property Name="Contact" Type="nvarchar" MaxLength="50" Nullable="false" />
           <Property Name="Password" Type="nvarchar" MaxLength="255" Nullable="false" />
           <Property Name="CreditBalance" Type="decimal" Precision="10" Scale="2" />
+          <Property Name="Role" Type="nvarchar" MaxLength="20" Nullable="false" />
         </EntityType>
         <Association Name="FK__BookingDe__BR_id__73BA3083">
           <End Role="BookingRequest" Type="Self.BookingRequest" Multiplicity="1">
@@ -382,6 +384,7 @@
           <NavigationProperty Name="User" Relationship="Self.FK__BookingReq__U_id__75A278F5" FromRole="BookingRequest" ToRole="Users" />
           <Property Name="CancelledDate" Type="DateTime" Precision="3" />
           <Property Name="PenaltyAmount" Type="Decimal" Precision="10" Scale="2" />
+          <Property Name="Rider_id" Type="Int32" />
         </EntityType>
         <EntityType Name="Dress">
           <Key>
@@ -489,6 +492,7 @@
           <NavigationProperty Name="Dresses" Relationship="Self.FK__Dress__U_id__778AC167" FromRole="Users" ToRole="Dress" />
           <NavigationProperty Name="UserAddresses" Relationship="Self.FK__UserAddres__U_id__7F2BE32F" FromRole="Users" ToRole="UserAddress" />
           <Property Name="CreditBalance" Type="Decimal" Precision="10" Scale="2" />
+          <Property Name="Role" Type="String" MaxLength="20" FixedLength="false" Unicode="true" Nullable="false" />
         </EntityType>
         <Association Name="FK__BookingDe__BR_id__73BA3083">
           <End Role="BookingRequest" Type="Self.BookingRequest" Multiplicity="1">
@@ -751,6 +755,7 @@
                 <ScalarProperty Name="NoOfDays" ColumnName="NoOfDays" />
                 <ScalarProperty Name="ReturnDate" ColumnName="ReturnDate" />
                 <ScalarProperty Name="Status" ColumnName="Status" />
+                <ScalarProperty Name="Rider_id" ColumnName="Rider_id" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
@@ -846,6 +851,7 @@
                 <ScalarProperty Name="Name" ColumnName="Name" />
                 <ScalarProperty Name="Contact" ColumnName="Contact" />
                 <ScalarProperty Name="Password" ColumnName="Password" />
+                <ScalarProperty Name="Role" ColumnName="Role" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>

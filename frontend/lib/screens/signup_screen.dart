@@ -3,7 +3,10 @@ import '../services/auth_service.dart';
 import 'login_screen.dart';
 
 class SignupScreen extends StatefulWidget {
-  const SignupScreen({super.key});
+  // ✅ Account type carried over from the login screen toggle
+  final String initialRole;
+
+  const SignupScreen({super.key, this.initialRole = "customer"});
 
   @override
   State<SignupScreen> createState() => _SignupScreenState();
@@ -18,6 +21,15 @@ class _SignupScreenState extends State<SignupScreen> {
   bool isLoading = false;
   String errorMessage = "";
 
+  // ✅ "customer" | "rider"
+  late String selectedRole;
+
+  @override
+  void initState() {
+    super.initState();
+    selectedRole = widget.initialRole;
+  }
+
   void registerUser() async {
     setState(() {
       isLoading = true;
@@ -29,6 +41,7 @@ class _SignupScreenState extends State<SignupScreen> {
       contactController.text.trim(),
       passwordController.text.trim(),
       confirmPasswordController.text.trim(),
+      role: selectedRole,
     );
 
     setState(() {
@@ -73,12 +86,39 @@ class _SignupScreenState extends State<SignupScreen> {
 
               const SizedBox(height: 10),
 
-              const Text(
-                "Elegance for every moment",
-                style: TextStyle(color: Colors.black54),
+              Text(
+                selectedRole == "rider"
+                    ? "Deliver dresses and earn per delivery"
+                    : "Elegance for every moment",
+                style: const TextStyle(color: Colors.black54),
               ),
 
-              const SizedBox(height: 40),
+              const SizedBox(height: 25),
+
+              // ✅ ACCOUNT TYPE — Customer or Rider
+              Container(
+                padding: const EdgeInsets.all(4),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(15),
+                  border: Border.all(color: Colors.grey.shade300),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: buildRoleButton("Customer", Icons.person),
+                    ),
+                    Expanded(
+                      child: buildRoleButton(
+                        "Rider",
+                        Icons.delivery_dining,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 25),
 
               buildInputField("Full Name", nameController),
               const SizedBox(height: 20),
@@ -137,7 +177,8 @@ class _SignupScreenState extends State<SignupScreen> {
                   Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => const LoginScreen(),
+                      builder: (context) =>
+                          LoginScreen(initialRole: selectedRole),
                     ),
                   );
                 },
@@ -179,6 +220,45 @@ class _SignupScreenState extends State<SignupScreen> {
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(15),
           borderSide: BorderSide.none,
+        ),
+      ),
+    );
+  }
+
+  // ✅ Segmented account-type button (Customer / Rider)
+  Widget buildRoleButton(String role, IconData icon) {
+    final selected = selectedRole == role.toLowerCase();
+
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          selectedRole = role.toLowerCase();
+          errorMessage = "";
+        });
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        decoration: BoxDecoration(
+          color: selected ? Colors.black : Colors.white,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              icon,
+              size: 18,
+              color: selected ? Colors.white : Colors.black54,
+            ),
+            const SizedBox(width: 6),
+            Text(
+              role,
+              style: TextStyle(
+                color: selected ? Colors.white : Colors.black54,
+                fontWeight: selected ? FontWeight.w600 : FontWeight.normal,
+              ),
+            ),
+          ],
         ),
       ),
     );

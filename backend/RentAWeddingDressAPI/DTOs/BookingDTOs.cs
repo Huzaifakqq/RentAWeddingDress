@@ -61,4 +61,40 @@ namespace RentAWeddingDressAPI.DTOs
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
     }
+
+    // ✅ RIDER: accept / update action on a delivery
+    public class RiderActionDTO
+    {
+        public int BookingId { get; set; }
+        public int RiderId { get; set; }
+
+        // "picked" | "delivered" (only used by the action endpoint)
+        public string Action { get; set; }
+    }
+
+    // ✅ RIDER: one order in the available / my-deliveries feed
+    public class RiderOrderDTO
+    {
+        public int BookingId { get; set; }
+        public DateTime StartDate { get; set; }
+        public DateTime EndDate { get; set; }
+        public int NoOfDays { get; set; }
+        public int? Status { get; set; }
+
+        public string CustomerName { get; set; }
+        public string CustomerContact { get; set; }
+        public string Address { get; set; }
+        public decimal? DeliveryLat { get; set; }
+        public decimal? DeliveryLng { get; set; }
+
+        public string DressTitle { get; set; }
+        public string DressImage { get; set; }
+        public decimal? ShopLat { get; set; }
+        public decimal? ShopLng { get; set; }
+
+        public decimal TotalPrice { get; set; }
+
+        // Hours until delivery (computed server-side for the countdown)
+        public double HoursUntil { get; set; }
+    }
 }

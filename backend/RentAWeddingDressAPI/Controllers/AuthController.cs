@@ -36,7 +36,9 @@ namespace RentAWeddingDressAPI.Controllers
             {
                 Name = model.Name,
                 Contact = model.Contact,
-                Password = model.Password
+                Password = model.Password,
+                // ✅ Rider registration via the signup toggle; everyone else is a customer
+                Role = string.IsNullOrWhiteSpace(model.Role) ? "customer" : model.Role.Trim().ToLower()
             };
 
             db.Users.Add(newUser);
@@ -61,13 +63,27 @@ namespace RentAWeddingDressAPI.Controllers
             if (user == null)
                 return BadRequest("Invalid Contact or Password");
 
+            // ✅ Role mode check: the login screen says which role is logging in
+            string userRole = string.IsNullOrWhiteSpace(user.Role) ? "customer" : user.Role.ToLower();
+
+            if (!string.IsNullOrWhiteSpace(model.Role))
+            {
+                string requestedRole = model.Role.Trim().ToLower();
+
+                if (userRole != requestedRole)
+                    return BadRequest(requestedRole == "rider"
+                        ? "This is not a rider account"
+                        : "This is not a customer account");
+            }
+
             // 3️⃣ Return Success Response
             return Ok(new
             {
                 Message = "Login Successful",
                 UserId = user.U_id,
                 Name = user.Name,
-                Contact = user.Contact
+                Contact = user.Contact,
+                Role = userRole
             });
         }
     }

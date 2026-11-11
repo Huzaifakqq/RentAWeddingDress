@@ -3,9 +3,13 @@ import 'package:rent_a_wedding_dress/models/user_session.dart';
 import '../services/auth_service.dart';
 import 'signup_screen.dart';
 import 'home_screen.dart';
+import 'rider_home_screen.dart';
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+  // ✅ Which mode to preselect (signup passes its selected role back)
+  final String initialRole;
+
+  const LoginScreen({super.key, this.initialRole = "customer"});
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -18,6 +22,15 @@ class _LoginScreenState extends State<LoginScreen> {
   bool isLoading = false;
   String errorMessage = "";
 
+  // ✅ Role mode selected on the login screen
+  late String selectedRole;
+
+  @override
+  void initState() {
+    super.initState();
+    selectedRole = widget.initialRole;
+  }
+
   void loginUser() async {
     setState(() {
       isLoading = true;
@@ -27,24 +40,31 @@ class _LoginScreenState extends State<LoginScreen> {
     final result = await AuthService.login(
       contactController.text.trim(),
       passwordController.text.trim(),
+      role: selectedRole,
     );
 
     setState(() {
       isLoading = false;
     });
 
-    if (result != null) {
+    if (result != null && result["Error"] == null) {
       UserSession.userId = result["UserId"];
       UserSession.name = result["Name"];
       UserSession.contact = result["Contact"];
-      // ✅ Navigate to Home Screen
+      UserSession.role = result["Role"] ?? selectedRole;
+
+      // ✅ Riders get their own app stack
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (_) => const HomeScreen()),
+        MaterialPageRoute(
+          builder: (_) => UserSession.role == "rider"
+              ? const RiderHomeScreen()
+              : const HomeScreen(),
+        ),
       );
     } else {
       setState(() {
-        errorMessage = "Invalid Contact or Password";
+        errorMessage = result?["Error"] ?? "Invalid Contact or Password";
       });
     }
   }
@@ -79,12 +99,39 @@ class _LoginScreenState extends State<LoginScreen> {
 
               const SizedBox(height: 10),
 
-              const Text(
-                "Sign in to find your perfect dress.",
-                style: TextStyle(fontSize: 16, color: Colors.black54),
+              Text(
+                selectedRole == "rider"
+                    ? "Sign in to start delivering."
+                    : "Sign in to find your perfect dress.",
+                style: const TextStyle(fontSize: 16, color: Colors.black54),
               ),
 
-              const SizedBox(height: 40),
+              const SizedBox(height: 30),
+
+              // ✅ ROLE MODE — Customer or Rider
+              Container(
+                padding: const EdgeInsets.all(4),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(15),
+                  border: Border.all(color: Colors.grey.shade300),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: buildModeButton("Customer", Icons.person),
+                    ),
+                    Expanded(
+                      child: buildModeButton(
+                        "Rider",
+                        Icons.delivery_dining,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 30),
 
               // ✅ Contact Field
               TextField(
@@ -152,7 +199,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => const SignupScreen(),
+                      builder: (context) =>
+                          SignupScreen(initialRole: selectedRole),
                     ),
                   );
                 },
@@ -174,6 +222,45 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  // ✅ Segmented mode button (Customer / Rider)
+  Widget buildModeButton(String role, IconData icon) {
+    final selected = selectedRole == role.toLowerCase();
+
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          selectedRole = role.toLowerCase();
+          errorMessage = "";
+        });
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        decoration: BoxDecoration(
+          color: selected ? Colors.black : Colors.white,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              icon,
+              size: 18,
+              color: selected ? Colors.white : Colors.black54,
+            ),
+            const SizedBox(width: 6),
+            Text(
+              role,
+              style: TextStyle(
+                color: selected ? Colors.white : Colors.black54,
+                fontWeight: selected ? FontWeight.w600 : FontWeight.normal,
+              ),
+            ),
+          ],
         ),
       ),
     );

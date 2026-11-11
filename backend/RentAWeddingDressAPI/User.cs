@@ -26,6 +26,7 @@ namespace RentAWeddingDressAPI
         public string Contact { get; set; }
         public string Password { get; set; }
         public Nullable<decimal> CreditBalance { get; set; }
+        public string Role { get; set; }
     
         public virtual ICollection<BookingRequest> BookingRequests { get; set; }
         public virtual ICollection<Dress> Dresses { get; set; }

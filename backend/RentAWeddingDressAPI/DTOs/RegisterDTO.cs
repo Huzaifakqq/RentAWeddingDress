@@ -19,5 +19,8 @@ namespace RentAWeddingDressAPI.DTOs
 
         [Required]
         public string ConfirmPassword { get; set; }
+
+        // ✅ "customer" (default) or "rider"
+        public string Role { get; set; }
     }
 }
