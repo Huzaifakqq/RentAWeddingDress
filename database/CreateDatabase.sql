@@ -18,13 +18,14 @@ GO
 
 -- 2. CREATE TABLES
 
--- Users (+ credit balance for penalty)
+-- Users (+ credit balance for penalty, + rider role)
 CREATE TABLE Users (
     U_id INT PRIMARY KEY IDENTITY(1,1),
     Name NVARCHAR(200) NOT NULL,
     Contact NVARCHAR(100) NOT NULL UNIQUE,
     Password NVARCHAR(510) NOT NULL,
-    CreditBalance DECIMAL(10,2) NULL DEFAULT 0
+    CreditBalance DECIMAL(10,2) NULL DEFAULT 0,
+    Role NVARCHAR(20) NOT NULL DEFAULT 'customer'  -- 'customer' | 'rider'
 );
 GO
 
@@ -114,7 +115,8 @@ CREATE TABLE BookingRequest (
     NoOfDays INT NOT NULL,
     Status INT NULL DEFAULT 0,  -- 0=Pending 1=Accepted 2=Cancelled 3=Rejected 4=Picked 5=PickupConfirmed 6=ReturnRequested 7=Completed
     CancelledDate DATETIME NULL,
-    PenaltyAmount DECIMAL(10,2) NULL DEFAULT 0
+    PenaltyAmount DECIMAL(10,2) NULL DEFAULT 0,
+    Rider_id INT NULL FOREIGN KEY REFERENCES Users(U_id)  -- rider who accepted the delivery
 );
 GO
 
@@ -152,6 +154,9 @@ GO
 
 -- Sample User (password: 123)
 INSERT INTO Users (Name, Contact, Password, CreditBalance) VALUES ('Admin', '03001234567', '123', 0);
+
+-- Sample Rider account (login mode: Rider)
+INSERT INTO Users (Name, Contact, Password, CreditBalance, Role) VALUES ('Bilal Rider', '03005555555', '123', 0, 'rider');
 GO
 
 -- Sample Address

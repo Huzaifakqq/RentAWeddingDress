@@ -7,12 +7,13 @@ GO
 
 -- ========== DEMO USERS ==========
 -- Owner (already exists): Admin / 03001234567 / 123
--- Add more users for customer + owner demo
-INSERT INTO Users (Name, Contact, Password, CreditBalance) VALUES
-('Ali Khan',    '03001111111', '123', 0),
-('Sara Ahmed',  '03002222222', '123', 0),
-('Usman Raza',  '03003333333', '123', 0),
-('Fatima Noor', '03004444444', '123', 0);
+-- Add more users for customer + owner demo (+ one rider)
+INSERT INTO Users (Name, Contact, Password, CreditBalance, Role) VALUES
+('Ali Khan',    '03001111111', '123', 0, 'customer'),
+('Sara Ahmed',  '03002222222', '123', 0, 'customer'),
+('Usman Raza',  '03003333333', '123', 0, 'customer'),
+('Fatima Noor', '03004444444', '123', 0, 'customer'),
+('Bilal Rider', '03005555555', '123', 0, 'rider');
 GO
 
 -- Addresses for each user
@@ -21,7 +22,8 @@ INSERT INTO UserAddress (U_id, Address, Latitude, Longitude) VALUES
 (2, 'Karachi, Pakistan',          24.8607, 67.0011),
 (3, 'Islamabad, Pakistan',        33.6844, 73.0479),
 (4, 'Rawalpindi, Pakistan',       33.5651, 73.0169),
-(5, 'Lahore, Gulberg, Pakistan',  31.5163, 74.3455);
+(5, 'Lahore, Gulberg, Pakistan',  31.5163, 74.3455),
+(6, 'Lahore, Johar Town, Pakistan', 31.5925, 74.3144);
 GO
 
 -- ========== DEMO DRESSES ==========
