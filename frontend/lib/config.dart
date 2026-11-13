@@ -1,8 +1,7 @@
 ﻿class Config {
-  // Demo: physical phone on same WiFi → use PC LAN IP
-  // DO NOT commit this file with the real IP
-  static const String baseUrl = "http://localhost/RentAWeddingDressAPI/api";
+  // Phase 1 test: local ASP.NET Core port (PostgreSQL in Docker)
+  // Local-only demo value — do NOT commit (same rule as the LAN IP / tunnel URL).
+  static const String baseUrl = "http://localhost:5199/api";
 
-  static const String imageBaseUrl =
-      "http://localhost/RentAWeddingDressAPI/";
+  static const String imageBaseUrl = "http://localhost:5199/";
 }

@@ -1,0 +1,6 @@
+@RentAWeddingDressAPI.Core_HostAddress = http://localhost:5093
+
+GET {{RentAWeddingDressAPI.Core_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
