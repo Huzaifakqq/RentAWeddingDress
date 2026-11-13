@@ -12,6 +12,9 @@ namespace RentAWeddingDressAPI
             // Show real exception details during development
             config.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
 
+            // ✅ CORS — required for the Flutter web build (Vercel) to reach this API
+            config.MessageHandlers.Add(new CorsHandler());
+
             // Web API configuration and services
 
             // Web API routes

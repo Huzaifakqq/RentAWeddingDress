@@ -1,4 +1,4 @@
-import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:rent_a_wedding_dress/screens/dresses_screen.dart';
@@ -17,7 +17,9 @@ class _UploadDressScreenState extends State<UploadDressScreen> {
   final TextEditingController priceController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
 
-  List<File> selectedImages = [];
+  // ✅ XFile (not dart:io File) so this screen also compiles for Flutter Web
+  List<XFile> selectedImages = [];
+  final Map<String, Uint8List> _thumbCache = {};
   List<String> uploadedImagePaths = [];
 
   List categories = [];
@@ -76,9 +78,48 @@ class _UploadDressScreenState extends State<UploadDressScreen> {
 
     if (images != null && images.isNotEmpty) {
       setState(() {
-        selectedImages.addAll(images.map((e) => File(e.path)).toList());
+        selectedImages.addAll(images);
       });
     }
+  }
+
+  // ✅ Thumbnail bytes (cached) — Image.memory works on Android AND web
+  Future<Uint8List> _thumbBytes(XFile file) async {
+    final cached = _thumbCache[file.path];
+    if (cached != null) return cached;
+    final bytes = await file.readAsBytes();
+    _thumbCache[file.path] = bytes;
+    return bytes;
+  }
+
+  Widget buildThumb(XFile file) {
+    return SizedBox(
+      width: 100,
+      height: 100,
+      child: FutureBuilder<Uint8List>(
+        future: _thumbBytes(file),
+        builder: (context, snap) {
+          if (snap.connectionState != ConnectionState.done) {
+            return const Center(
+              child: SizedBox(
+                width: 18,
+                height: 18,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
+            );
+          }
+          if (snap.hasError || !snap.hasData) {
+            return const Icon(Icons.broken_image, color: Colors.black26);
+          }
+          return Image.memory(
+            snap.data!,
+            width: 100,
+            height: 100,
+            fit: BoxFit.cover,
+          );
+        },
+      ),
+    );
   }
 
   Future<void> uploadImages() async {
@@ -230,12 +271,7 @@ class _UploadDressScreenState extends State<UploadDressScreen> {
                                 padding: const EdgeInsets.all(8),
                                 child: ClipRRect(
                                   borderRadius: BorderRadius.circular(8),
-                                  child: Image.file(
-                                    selectedImages[index],
-                                    width: 100,
-                                    height: 100,
-                                    fit: BoxFit.cover,
-                                  ),
+                                  child: buildThumb(selectedImages[index]),
                                 ),
                               ),
                               Positioned(

@@ -1,5 +1,6 @@
 import 'dart:convert';
-import 'dart:io';
+// ✅ cross_file works on BOTH Android and web (dart:io does not exist on web)
+import 'package:cross_file/cross_file.dart';
 import 'package:http/http.dart' as http;
 import '../models/dress_model.dart';
 import '../config.dart';
@@ -85,14 +86,25 @@ class DressService {
     }
   }
 
-  static Future<String?> uploadImage(File file) async {
+  static Future<String?> uploadImage(XFile file) async {
     try {
       var request = http.MultipartRequest(
         'POST',
         Uri.parse("${Config.baseUrl}/dresses/upload-image"),
       );
 
-      request.files.add(await http.MultipartFile.fromPath('file', file.path));
+      // ✅ fromBytes works on web too (fromPath needs dart:io → web build fails)
+      //    The backend derives the extension from the filename — keep it safe.
+      String fileName = file.name;
+      if (!fileName.contains(".")) fileName = "$fileName.jpg";
+
+      request.files.add(
+        http.MultipartFile.fromBytes(
+          'file',
+          await file.readAsBytes(),
+          filename: fileName,
+        ),
+      );
 
       var response = await request.send();
 
